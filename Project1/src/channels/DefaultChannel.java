@@ -12,7 +12,7 @@ public class DefaultChannel {
 	private Server server;
 	private MulticastSocket socket;
 	
-	protected DefaultChannel(String ip, String port, Server server) throws IOException {
+	public DefaultChannel(String ip, String port, Server server) throws IOException {
 		this.ip = InetAddress.getByName(ip);
 		this.port = Integer.parseInt(port);
 		this.server = server;

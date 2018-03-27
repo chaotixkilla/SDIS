@@ -3,27 +3,109 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.regex.Pattern;
+
+import channels.BackupChannel;
+import channels.ControlChannel;
+import channels.RestoreChannel;
+
+import java.io.IOException;
 import java.rmi.AlreadyBoundException;
 
 public class Server implements ClientInterface{
 	private String protocolVersion;
 	private String serverID;
 	private String accessPoint;
+	private ControlChannel MC;
+	private BackupChannel MDB;
+	private RestoreChannel MDR;
+	
 
-	protected Server(String[] args) throws RemoteException{
-        //args[0] = protocol version
-		//args[1] = server id
-		//args[2] = service access point
-		//args[3] = control channel ip
-		//args[4] = control channel port
-		//args[5] = data backup channel ip
-		//args[6] = data backup channel port
-		//args[7] = data restore channel ip
-		//args[8] = data restore channel port
-		this.protocolVersion = args[0];
-		this.serverID = args[1];
+	protected Server(String[] args) throws IOException{
+		this.protocolVersion = this.checkValidProtocol(args[0]);
+		this.serverID = this.checkNumber(args[1]);
 		this.accessPoint = args[2];
+		
+		String mcIP = this.checkValidIP(args[3]);
+		String mcPort = this.checkValidPort(args[4]);
+		this.MC = new ControlChannel(mcIP, mcPort, this);
+		
+		String mdbIP = this.checkValidIP(args[5]);
+		String mdbPort = this.checkValidPort(args[6]);
+		this.MDB = new BackupChannel(mdbIP, mdbPort, this);
+		
+		String mdrIP = this.checkValidIP(args[7]);
+		String mdrPort = this.checkValidPort(args[8]);
+		this.MDR = new RestoreChannel(mdrIP, mdrPort, this);
+		
+		System.out.println("Creating server (ID = " + this.serverID + ") using protocol " + this.protocolVersion 
+				+ " with the following information:");
+		System.out.println("ControlChannel = " + mcIP + ":" + mcPort);
+		System.out.println("BackupChannel = " + mdbIP + ":" + mdbPort);
+		System.out.println("RestoreChannel = " + mdrIP + ":" + mdrPort);
     }
+	
+	public String checkValidProtocol(String protocol) {
+		boolean b = Pattern.matches("^[0-9]\\.[0-9]$", protocol);
+		if(b) {
+			return protocol;
+		}
+		else {
+			System.out.println(protocol + " is not a valid protocol version! Ex.: 1.0, 2.0, 2.1, etc\n");
+			this.showError();
+			return "";
+		}
+	}
+	
+	public String checkNumber(String number) {
+		boolean b = Pattern.matches("^[0-9]+$", number);
+		if(b) {
+			return number;
+		}
+		else {
+			System.out.println(number + " is not a valid number! \n");
+			this.showError();
+			return "";
+		}
+	}
+	
+	public String checkValidIP(String ip) {
+		boolean b = Pattern.matches("^2(?:2[4-9]|3\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d?|0)){3}$", ip);
+		if(b) {
+			return ip;
+		}
+		else {
+			System.out.println(ip + " is not a valid multicast IP! Range: 224.0.0.1 to 239.255.255.255\n");
+			this.showError();
+			return "";
+		}
+	}
+	
+	public String checkValidPort(String port) {
+		boolean b = false;
+		
+		int portAux = Integer.parseInt(port);
+		
+		if(portAux >= 0 && portAux <= 65535) {
+			b = true;
+		}
+		
+		if(b) {
+			return port;
+		}
+		else {
+			System.out.println(port + " is not a valid port! Range: 0-65535\n");
+			this.showError();
+			return "";
+		}
+	}
+	
+	public void showError() {
+		System.out.println("Error, wrong Server invocation!\n");
+		System.out.println("To correctly call Server, you need to follow the following syntax:");
+		System.out.println("java Server <protocol_version> <server_id> <access_point> <mc_ip> <mc_port> <mdb_ip> <mdb_port> <mdr_ip> <mdr_port>\n");
+		System.exit(-1);
+	}
 	
 	@Override
 	public String hello(String name) throws RemoteException{
