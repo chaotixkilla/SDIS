@@ -122,12 +122,28 @@ public class TestApp {
 		}
 	}
 	
+	public String getAccessPoint() {
+		return this.accessPoint;
+	}
+	
+	public String getOperation() {
+		return this.operation;
+	}
+	
+	public String getFirstOperand() {
+		return this.firstOperand;
+	}
+	
+	public String getSecondOperand() {
+		return this.secondOperand;
+	}
+	
 	public void showError() {
 		System.out.println("Error, wrong TestApp invocation!\n");
 		System.out.println("To correctly call TestApp, you need to follow the following syntax:");
 		System.out.println("java TestApp <peer_ap> <sub_protocol> <opnd_1> <opnd_2>\n");
 		System.out.println("<peer_ap> is the peer's access point;");
-		System.out.println("<operation> is one of \" BACKUP, RESTORE, DELETE, RECLAIM \"");
+		System.out.println("<operation> is one of \" BACKUP, RESTORE, DELETE, RECLAIM, STATE\"");
 		System.out.println("(OPTIONAL) <opnd_1> is a filename when the <operation> is "
 				+ "'BACKUP', 'RESTORE' or 'DELETE' and an integer when it's 'RECLAIM'");
 		System.out.println("(OPTIONAL) <opnd_2> is an integer when the <operation> is 'BACKUP'");
@@ -138,7 +154,7 @@ public class TestApp {
 		try {
 			TestApp testapp = new TestApp(args);
 			Registry registry = LocateRegistry.getRegistry();
-			ClientInterface client = (ClientInterface) registry.lookup("ClientInterface");
+			ClientInterface client = (ClientInterface) registry.lookup(testapp.getAccessPoint());
 			System.out.println(client.hello("Teste"));
 		}
 		catch(Exception e) {
