@@ -21,7 +21,7 @@ public class Server implements ClientInterface{
         	Server server = new Server();
         	ClientInterface client = (ClientInterface) UnicastRemoteObject.exportObject(server, 0);
             Registry registry = LocateRegistry.getRegistry();
-            registry.bind("ClientInterface", client); //"ClientInterface" will be the access point given in the args
+            registry.rebind("ClientInterface", client); //"ClientInterface" will be the access point given in the args
             System.out.println("Server initiated!");
         }
         catch(Exception e){
