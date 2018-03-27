@@ -1,12 +1,20 @@
-import java.net.MalformedURLException;
-import java.rmi.Naming;
+package interfaces;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 
 public class TestApp {
 
-	public static void main(String[] args) throws MalformedURLException, RemoteException, NotBoundException {
-		ClientInterface client = (ClientInterface) Naming.lookup("localhost");
-		System.out.println(client.hello("Teste"));
+	public static void main(String[] args) throws RemoteException, NotBoundException{
+		try {
+			Registry registry = LocateRegistry.getRegistry();
+			ClientInterface client = (ClientInterface) registry.lookup("ClientInterface");
+			System.out.println(client.hello("Teste"));
+		}
+		catch(Exception e) {
+			System.out.println(e.toString());
+			e.printStackTrace(); 
+		}
 	}
 }

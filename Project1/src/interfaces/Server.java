@@ -1,25 +1,32 @@
+package interfaces;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.rmi.Naming;
-import java.net.MalformedURLException;
+import java.rmi.AlreadyBoundException;
 
-public class Server extends UnicastRemoteObject implements ClientInterface{
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+public class Server implements ClientInterface{
 
 	protected Server() throws RemoteException{
-        super();
+        
     }
+	
+	@Override
+	public String hello(String name) throws RemoteException{
+    	return "Hello " + name + ", the connection was made successfully!";
+	}
 
-    @Override
-    public String hello(String name) throws RemoteException{
-        return "Vai dormir, " + name;
-    }
-
-    public static void main(String[] args) throws RemoteException, MalformedURLException {
-        Server server = new Server();
-        Naming.rebind("localhost", server);
-    }
+    public static void main(String[] args) throws RemoteException, AlreadyBoundException {
+        try {
+        	Server server = new Server();
+        	ClientInterface client = (ClientInterface) UnicastRemoteObject.exportObject(server, 0);
+            Registry registry = LocateRegistry.getRegistry();
+            registry.bind("ClientInterface", client); //"ClientInterface" will be the access point given in the args
+            System.out.println("Server initiated!");
+        }
+        catch(Exception e){
+        	System.out.println(e.toString());
+        	e.printStackTrace(); 
+        }
+    } 
 }

@@ -1,7 +1,4 @@
-/**
- * Trying to use RMI
- * */
-
+package interfaces;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
