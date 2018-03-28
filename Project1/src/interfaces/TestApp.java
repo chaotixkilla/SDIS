@@ -5,6 +5,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.regex.Pattern;
 
+import files.File;
+
 public class TestApp {
 	private String accessPoint;
 	private String operation;
@@ -156,6 +158,12 @@ public class TestApp {
 			Registry registry = LocateRegistry.getRegistry();
 			ClientInterface client = (ClientInterface) registry.lookup(testapp.getAccessPoint());
 			System.out.println(client.hello("Teste"));
+			
+			System.out.println("\n\nTesting SHA256:\n");
+			File file = new File("123", "/home/Desktop/sdis/bin/Ademar.jpg", "28/03/2018");
+			System.out.println("fileId: " + file.getFileId());
+			file.encodeSHA256();
+			System.out.println("sha256 fileId: " + file.getEncodedFileId());
 		}
 		catch(Exception e) {
 			System.out.println(e.toString());
