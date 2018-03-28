@@ -2,7 +2,7 @@ package files;
 
 import utilities.Utils;
 
-public class File {
+public class FileObject {
 
 	private String fileId;
 	private String encodedFileId;
@@ -10,23 +10,23 @@ public class File {
 	private String creationDate;
 	private byte[] data;
 	
-	public File() {}
-	public File(String fileId, String path, String creationDate, byte[] data) {
+	public FileObject() {}
+	public FileObject(String fileId, String path, String creationDate, byte[] data) {
 		this.fileId = fileId;
 		this.path = path;
 		this.creationDate = creationDate;
 		this.data = data;
 	}
-	public File(String fileId, String path, String creationDate) {
+	public FileObject(String fileId, String path, String creationDate) {
 		this.fileId = fileId;
 		this.path = path;
 		this.creationDate = creationDate;
 	}
-	public File(String fileId, String path) {
+	public FileObject(String fileId, String path) {
 		this.fileId = fileId;
 		this.path = path;
 	}
-	public File(String fileId) {
+	public FileObject(String fileId) {
 		this.fileId = fileId;
 	}
 	
