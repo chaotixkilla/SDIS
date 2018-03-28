@@ -9,4 +9,10 @@ public class RestoreChannel extends DefaultChannel {
 		super(ip, port, server);
 	}
 
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		System.out.println("Restore Thread initiated!");
+	}
+
 }

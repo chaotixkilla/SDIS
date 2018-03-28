@@ -117,8 +117,17 @@ public class Server implements ClientInterface{
         	Server server = new Server(args);
         	ClientInterface client = (ClientInterface) UnicastRemoteObject.exportObject(server, 0);
             Registry registry = LocateRegistry.getRegistry();
-            registry.rebind(server.accessPoint, client); //"ClientInterface" will be the access point given in the args
+            registry.rebind(server.accessPoint, client);
             System.out.println("Server initiated!");
+            
+            //start threads
+            Thread controlChannelThread = new Thread(server.MC);
+            Thread backupChannelThread = new Thread(server.MDB);
+            Thread restoreChannelThread = new Thread(server.MDR);
+            
+            controlChannelThread.start();
+            backupChannelThread.start();
+            restoreChannelThread.start();
         }
         catch(Exception e){
         	System.out.println(e.toString());

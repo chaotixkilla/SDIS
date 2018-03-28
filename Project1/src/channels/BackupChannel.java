@@ -9,4 +9,10 @@ public class BackupChannel extends DefaultChannel {
 		super(ip, port, server);
 	}
 
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		System.out.println("Backup Thread initiated!");
+	}
+
 }

@@ -6,7 +6,7 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import interfaces.Server;
 
-public class DefaultChannel {
+public abstract class DefaultChannel implements Runnable {
 	private InetAddress ip;
 	private int port;
 	private Server server;

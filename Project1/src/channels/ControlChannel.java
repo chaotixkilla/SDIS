@@ -9,4 +9,10 @@ public class ControlChannel extends DefaultChannel {
 		super(ip, port, server);
 	}
 
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		System.out.println("Control Thread initiated!");
+	}
+
 }
