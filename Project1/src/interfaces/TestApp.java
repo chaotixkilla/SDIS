@@ -6,6 +6,7 @@ import java.rmi.registry.Registry;
 import java.util.regex.Pattern;
 
 import files.FileObject;
+import files.FileSplitter;
 
 public class TestApp {
 	private String accessPoint;
@@ -159,11 +160,21 @@ public class TestApp {
 			ClientInterface client = (ClientInterface) registry.lookup(testapp.getAccessPoint());
 			System.out.println(client.hello("Teste"));
 			
+			//SHA256 tests
 			System.out.println("\n\nTesting SHA256:\n");
 			FileObject file = new FileObject("123", "/home/Desktop/sdis/bin/Ademar.jpg", "28/03/2018");
 			System.out.println("fileId: " + file.getFileId());
 			file.encodeSHA256();
 			System.out.println("sha256 fileId: " + file.getEncodedFileId());
+			
+			//FileSplitter split method tests
+			System.out.println("\n\nTesting FileSplitter.split() method:\n");
+			byte[] data = "0000000000000000".getBytes();
+			file.setData(data);
+			FileSplitter splitter = new FileSplitter(file, 2);
+			splitter.split();
+			
+			
 		}
 		catch(Exception e) {
 			System.out.println(e.toString());
