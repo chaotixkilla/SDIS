@@ -198,12 +198,8 @@ public class TestApp {
 			System.out.print("\n\nTesting FileSplitter.fileRead() method:\n");
 			String cenaspath = cenas.getAbsolutePath();
 			Path path = Paths.get(cenaspath);
-<<<<<<< HEAD
 			System.out.println(splitter.readFile(cenaspath));
 			*/
-=======
-			System.out.println(splitter.readFile(cenaspath));*/
->>>>>>> 1699c250728c5d4e2cee4818db1dea31706fd45e
 			
 		}
 		catch(Exception e) {
