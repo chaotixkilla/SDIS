@@ -44,9 +44,6 @@ public class Server implements ClientInterface{
 		System.out.println("ControlChannel = " + mcIP + ":" + mcPort);
 		System.out.println("BackupChannel = " + mdbIP + ":" + mdbPort);
 		System.out.println("RestoreChannel = " + mdrIP + ":" + mdrPort);
-		
-		Header header = new Header("PUTCHUNK", this.protocolVersion, this.serverID, "fdsfdasgfasdg", "0", "3");
-		this.sendHeaderTest(header);
 	}
 	
 	public String checkValidProtocol(String protocol) {
@@ -137,14 +134,12 @@ public class Server implements ClientInterface{
         	System.out.println(e.toString());
         	e.printStackTrace(); 
         }
-    } 
-    
-    public void wokeUp() throws IOException {
-    	String msg = "Server " + this.serverID + " woke up";
-    	this.MC.sendMessage(msg.getBytes());
     }
-    
-    public void sendHeaderTest(Header header) throws IOException {
-    	this.MC.sendMessage(header.getHeader());
-    }
+
+	@Override
+	public void backup(String filePath, String replicationDegree) throws IOException {
+		// TODO Auto-generated method stub
+		Header header = new Header("PUTCHUNK", this.protocolVersion, this.serverID, filePath, "0", replicationDegree);
+		this.MC.sendMessage(header.getHeader());
+	}
 }

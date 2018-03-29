@@ -158,7 +158,15 @@ public class TestApp {
 			TestApp testapp = new TestApp(args);
 			Registry registry = LocateRegistry.getRegistry();
 			ClientInterface client = (ClientInterface) registry.lookup(testapp.getAccessPoint());
-			System.out.println(client.hello("Teste"));
+			//System.out.println(client.hello("Teste"));
+			
+			switch(testapp.operation) {
+				case "BACKUP":
+					client.backup(testapp.firstOperand, testapp.secondOperand);
+					break;
+				default:
+					break;
+			}
 			/*
 			//SHA256 tests
 			System.out.println("\n\nTesting SHA256:\n");
