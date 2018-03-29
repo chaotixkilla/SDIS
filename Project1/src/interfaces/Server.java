@@ -12,6 +12,7 @@ import messages.Body;
 import messages.Header;
 import messages.Message;
 import protocols.Backup;
+import protocols.Restore;
 
 import java.io.IOException;
 import java.rmi.AlreadyBoundException;
@@ -168,7 +169,6 @@ public class Server implements ClientInterface{
 	@Override
 	public void restore(String fileName) throws IOException {
 		// TODO Auto-generated method stub
-		Header header = new Header("GETCHUNK", this.protocolVersion, this.serverID, fileName);
-		this.MC.sendMessage(header.getHeader());
+		Restore.send(this.MC, this.protocolVersion, this.serverID, fileName);
 	}
 }
