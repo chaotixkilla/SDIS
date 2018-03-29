@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import channels.BackupChannel;
 import channels.ControlChannel;
 import channels.RestoreChannel;
+import messages.Header;
 
 import java.io.IOException;
 import java.rmi.AlreadyBoundException;
@@ -44,8 +45,9 @@ public class Server implements ClientInterface{
 		System.out.println("BackupChannel = " + mdbIP + ":" + mdbPort);
 		System.out.println("RestoreChannel = " + mdrIP + ":" + mdrPort);
 		
-		this.wokeUp();
-    }
+		Header header = new Header("PUTCHUNK", this.protocolVersion, this.serverID, "fdsfdasgfasdg", "0", "3");
+		this.sendHeaderTest(header);
+	}
 	
 	public String checkValidProtocol(String protocol) {
 		boolean b = Pattern.matches("^[0-9]\\.[0-9]$", protocol);
@@ -140,5 +142,9 @@ public class Server implements ClientInterface{
     public void wokeUp() throws IOException {
     	String msg = "Server " + this.serverID + " woke up";
     	this.MC.sendMessage(msg.getBytes());
+    }
+    
+    public void sendHeaderTest(Header header) throws IOException {
+    	this.MC.sendMessage(header.getHeader());
     }
 }
