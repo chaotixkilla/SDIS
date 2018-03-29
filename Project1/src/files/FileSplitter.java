@@ -13,6 +13,9 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import utilities.Utils;
+
 import static java.lang.Math.toIntExact;
 
 public class FileSplitter {
@@ -91,5 +94,21 @@ public class FileSplitter {
 	    return chunks;
 	}
 	
+	public boolean fileSavior(ArrayList<byte[]> chunks, int peers, File file) {
+		
+		try {
+			Utils util = new Utils();
+			BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+			String encodedId = util.sha256(file.getName() + "/" + attr.creationTime().toString() + "/" + file.getAbsolutePath());
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		for(int i = 0; i < peers; i++) {
+			
+		}
+		return true;
+	}
 
 }
