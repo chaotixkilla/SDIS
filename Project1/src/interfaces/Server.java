@@ -8,7 +8,10 @@ import java.util.regex.Pattern;
 import channels.BackupChannel;
 import channels.ControlChannel;
 import channels.RestoreChannel;
+import messages.Body;
 import messages.Header;
+import messages.Message;
+import protocols.Backup;
 
 import java.io.IOException;
 import java.rmi.AlreadyBoundException;
@@ -139,7 +142,13 @@ public class Server implements ClientInterface{
 	@Override
 	public void backup(String filePath, String replicationDegree) throws IOException {
 		// TODO Auto-generated method stub
-		Header header = new Header("PUTCHUNK", this.protocolVersion, this.serverID, filePath, "0", replicationDegree);
+		Backup.send(this.MDB, this.protocolVersion, this.serverID, filePath, replicationDegree);
+	}
+
+	@Override
+	public void restore(String fileName) throws IOException {
+		// TODO Auto-generated method stub
+		Header header = new Header("GETCHUNK", this.protocolVersion, this.serverID, fileName);
 		this.MC.sendMessage(header.getHeader());
 	}
 }

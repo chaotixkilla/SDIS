@@ -164,6 +164,8 @@ public class TestApp {
 				case "BACKUP":
 					client.backup(testapp.firstOperand, testapp.secondOperand);
 					break;
+				case "RESTORE":
+					client.restore(testapp.firstOperand);
 				default:
 					break;
 			}
