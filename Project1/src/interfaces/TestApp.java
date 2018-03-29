@@ -159,7 +159,7 @@ public class TestApp {
 			Registry registry = LocateRegistry.getRegistry();
 			ClientInterface client = (ClientInterface) registry.lookup(testapp.getAccessPoint());
 			System.out.println(client.hello("Teste"));
-			
+			/*
 			//SHA256 tests
 			System.out.println("\n\nTesting SHA256:\n");
 			FileObject file = new FileObject("123", "/home/Desktop/sdis/bin/Ademar.jpg", "28/03/2018");
@@ -172,7 +172,7 @@ public class TestApp {
 			byte[] data = "0000000000000000".getBytes();
 			file.setData(data);
 			FileSplitter splitter = new FileSplitter(file, 2);
-			splitter.split();
+			splitter.split();*/
 			
 			
 		}

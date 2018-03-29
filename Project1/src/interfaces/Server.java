@@ -43,6 +43,8 @@ public class Server implements ClientInterface{
 		System.out.println("ControlChannel = " + mcIP + ":" + mcPort);
 		System.out.println("BackupChannel = " + mdbIP + ":" + mdbPort);
 		System.out.println("RestoreChannel = " + mdrIP + ":" + mdrPort);
+		
+		this.wokeUp();
     }
 	
 	public String checkValidProtocol(String protocol) {
@@ -134,4 +136,9 @@ public class Server implements ClientInterface{
         	e.printStackTrace(); 
         }
     } 
+    
+    public void wokeUp() throws IOException {
+    	String msg = "Server " + this.serverID + " woke up";
+    	this.MC.sendMessage(msg.getBytes());
+    }
 }
