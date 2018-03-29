@@ -1,4 +1,7 @@
 package interfaces;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -169,7 +172,7 @@ public class TestApp {
 				default:
 					break;
 			}
-			/*
+			
 			//SHA256 tests
 			System.out.println("\n\nTesting SHA256:\n");
 			FileObject file = new FileObject("123", "/home/Desktop/sdis/bin/Ademar.jpg", "28/03/2018");
@@ -181,9 +184,15 @@ public class TestApp {
 			System.out.println("\n\nTesting FileSplitter.split() method:\n");
 			byte[] data = "0000000000000000".getBytes();
 			file.setData(data);
-			FileSplitter splitter = new FileSplitter(file, 2);
-			splitter.split();*/
+			File cenas = new File("cenas.zip");
+			FileSplitter splitter = new FileSplitter();
+			splitter.split(cenas);
 			
+			//FileSplitter readFile tests
+			System.out.print("\n\nTesting FileSplitter.fileRead() method:\n");
+			String cenaspath = cenas.getAbsolutePath();
+			Path path = Paths.get(cenaspath);
+			System.out.println(splitter.readFile(cenaspath));
 			
 		}
 		catch(Exception e) {
