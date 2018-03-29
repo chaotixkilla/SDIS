@@ -22,16 +22,38 @@ public class Message {
 		this.message = message;
 	}
 	
+	public Message(Header header) {
+		this.header = header;
+		this.body = null;
+		this.message = header.getHeader();
+	}
+	
 	public Message(String s) {
 		this.message = s.getBytes();
 	}
 	
 	public Message(DatagramPacket packet) {
 		String received = new String(packet.getData(), 0, packet.getLength());
-		System.out.println("Message: " + received);
+		
+		String[] message = received.split(" \r\n\r\n");
+		//System.out.println("Header: " + message[0]);
+		//System.out.println("Body: " + message[1]);
+		
+		this.header = new Header(message[0]);
+		if(this.body != null) {
+			this.body = new Body(message[1]);
+		}
 	}
 	
 	public byte[] getMessage() {
 		return this.message;
+	}
+	
+	public Header getHeader() {
+		return this.header;
+	}
+	
+	public Body getBody() {
+		return this.body;
 	}
 }

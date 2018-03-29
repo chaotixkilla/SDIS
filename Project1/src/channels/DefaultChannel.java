@@ -40,11 +40,11 @@ public abstract class DefaultChannel implements Runnable {
 	
 	public void sendMessage(byte[] msg) throws IOException {
 		
-		String received = new String(msg, 0, msg.length);
+		//String received = new String(msg, 0, msg.length);
 		
 		DatagramPacket msgPacket = new DatagramPacket(msg, msg.length, this.ip, this.port);
 		this.socket.send(msgPacket);
 		
-		System.out.println("Sent: " + received);
+		//System.out.println("Sent: " + received);
 	}
 }
