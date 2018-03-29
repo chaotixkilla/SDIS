@@ -173,7 +173,7 @@ public class TestApp {
 				default:
 					break;
 			}
-			
+			/*
 			//SHA256 tests
 			System.out.println("\n\nTesting SHA256:\n");
 			FileObject file = new FileObject("123", "/home/Desktop/sdis/bin/Ademar.jpg", "28/03/2018");
@@ -198,8 +198,12 @@ public class TestApp {
 			System.out.print("\n\nTesting FileSplitter.fileRead() method:\n");
 			String cenaspath = cenas.getAbsolutePath();
 			Path path = Paths.get(cenaspath);
+<<<<<<< HEAD
 			System.out.println(splitter.readFile(cenaspath));
 			*/
+=======
+			System.out.println(splitter.readFile(cenaspath));*/
+>>>>>>> 1699c250728c5d4e2cee4818db1dea31706fd45e
 			
 		}
 		catch(Exception e) {

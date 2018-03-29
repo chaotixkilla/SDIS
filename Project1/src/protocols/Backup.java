@@ -28,14 +28,14 @@ public class Backup {
 		}
 	}
 	
-	public void respond(ControlChannel MC, String protocolVersion, String serverID, String fileID, String chunkNum) {
+	public static void respond(ControlChannel MC, String protocolVersion, String serverID, String fileID, String chunkNum) {
 		try {
 			Header header = new Header("STORED", protocolVersion, serverID, fileID, chunkNum);
-			Body body = new Body("fsdafdsaf");
 			
 			Message msg;
-			msg = new Message(header, body);
-		} catch(IOException e) {
+			msg = new Message(header);
+			MC.sendMessage(msg.getMessage());
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

@@ -111,6 +111,26 @@ public class Server implements ClientInterface{
 		System.exit(-1);
 	}
 	
+	public String getProtocolVersion() {
+		return this.protocolVersion;
+	}
+	
+	public String getServerID() {
+		return this.serverID;
+	}
+	
+	public BackupChannel getMDB() {
+		return this.MDB;
+	}
+	
+	public ControlChannel getMC() {
+		return this.MC;
+	}
+	
+	public RestoreChannel getMDR() {
+		return this.MDR;
+	}
+	
 	@Override
 	public String hello(String name) throws RemoteException{
     	return "Hello " + name + ", the connection was made successfully!";
