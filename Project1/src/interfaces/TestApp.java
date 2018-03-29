@@ -6,6 +6,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 import files.FileObject;
@@ -186,13 +187,19 @@ public class TestApp {
 			file.setData(data);
 			File cenas = new File("cenas.zip");
 			FileSplitter splitter = new FileSplitter();
-			splitter.split(cenas);
+			ArrayList<byte[]> chunks = splitter.split(cenas);
+			System.out.println(chunks.size() + " chunks obtained from file:");
+			for(int i = 0; i < chunks.size(); i++) {
+				System.out.println("Chunk no. " + i + ": " + chunks.get(i));
+			}
 			
+			/*
 			//FileSplitter readFile tests
 			System.out.print("\n\nTesting FileSplitter.fileRead() method:\n");
 			String cenaspath = cenas.getAbsolutePath();
 			Path path = Paths.get(cenaspath);
 			System.out.println(splitter.readFile(cenaspath));
+			*/
 			
 		}
 		catch(Exception e) {

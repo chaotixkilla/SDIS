@@ -13,6 +13,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import static java.lang.Math.toIntExact;
 
 public class FileSplitter {
 	
@@ -49,7 +50,23 @@ public class FileSplitter {
 		return output;
 	}
 	
-	public boolean split(File file) {
+	/*
+	   public static ArrayList<byte[]> chunk_file(byte[] file){
+	    	
+	    	arrayList<byte[]> chunks = new ArrayList<byte[]>();
+	    	
+	    	int size = Chunk.CHUNK_SIZE;
+	    	for(int i = 0; i*Chunk.CHUNK_SIZE < file.length; i++) {
+	    		byte[] chunk = Arrays.copyOfRange(file, i*size, Math.min(file.length,  (i+1)*size));
+	    		chuncks.add(chunk);
+	    	}
+	    	return chunks;	
+	    }
+	*/
+	
+	public ArrayList<byte[]> split(File file) {
+		
+		ArrayList<byte[]> chunks = new ArrayList<byte[]>();
 		
 		try {
 		
@@ -60,53 +77,18 @@ public class FileSplitter {
 		String path = file.getAbsolutePath();
 		String data = readFile(path);
 		
-		//check if the maximum chunk size is a multiple of the total file size
-		if((data.length() % 64000) != 0) {
-			//last chunk will have size = 0
-			int numberOfChunks = data.length() / 64000;
-			int chunkSize = data.length() / numberOfChunks;
-			
-			for(int i = 0; i < numberOfChunks; i++) {
-				chunks.add(new Chunk(name, i));
-			}
-
-			Byte[] dataBytes = new Byte[data.length()];
-			
-			for(int i = 0; i < data.length(); i++){
-				dataBytes[i++] = dataBytes[i];
-			}
-			
-			List<Byte> dataBytesList = Arrays.asList(dataBytes);
-			
-		    for (int start = 0; start < dataBytesList.size(); start += chunkSize) {
-		        int end = Math.min(start + chunkSize, dataBytesList.size());
-		        List<Byte> sublist = dataBytesList.subList(start, end);
-		        System.out.println(sublist);
-		    }
-			
-		    /*
-		    public static ArrayList<byte[]> chunk_file(byte[] file){
-		    	
-		    	arrayList<byte[]> chunks = new ArrayList<byte[]>();
-		    	
-		    	int size = Chunk.CHUNK_SIZE;
-		    	for(int i = 0; i*Chunk.CHUNK_SIZE < file.length; i++) {
-		    		byte[] chunk = Arrays.copyOfRange(file, i*size, Math.min(file.length,  (i+1)*size));
-		    		chuncks.add(chunk);
-		    	}
-		    	return chunks;
-		    	
-		    }
-		    */
-		    	
+		System.out.println("\nFILE SIZE: " + file.length());
+		
+		int size = 64000;
+		for(int i = 0; i*size < file.length(); i++) {
+			byte[] chunk = Arrays.copyOfRange(data.getBytes(), i*size, toIntExact(Math.min(file.length(), (i+1)*size)));
+			chunks.add(chunk);
 			}
 		}
 		catch (IOException e){
 			e.printStackTrace();
-			return false;
 		}
-		System.out.print("Splitter.split() failed"); 
-		return true;
+	    return chunks;
 	}
 	
 
