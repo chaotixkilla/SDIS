@@ -1,5 +1,6 @@
 package interfaces;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.rmi.NotBoundException;
@@ -190,6 +191,10 @@ public class TestApp {
 			ArrayList<byte[]> chunks = splitter.split(cenas);
 			System.out.println(chunks.size() + " chunks obtained from file:");
 			for(int i = 0; i < chunks.size(); i++) {
+				byte[] buffer = chunks.get(i);
+				String filename = Integer.toString(i);
+				FileOutputStream ficheiro = new FileOutputStream(filename);
+				ficheiro.write(buffer);
 				System.out.println("Chunk no. " + i + ": " + chunks.get(i));
 			}
 			
