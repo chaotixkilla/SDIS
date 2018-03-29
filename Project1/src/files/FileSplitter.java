@@ -97,16 +97,25 @@ public class FileSplitter {
 	public boolean fileSavior(ArrayList<byte[]> chunks, int peers, File file) {
 		
 		try {
+			File dir = new File("/chunkas");
+		        if (!file.exists()) file.mkdir();      
+	            else {
+	                System.out.println("FileSplitter: fileSaviour: failed directory creation");
+	                return false;
+	            }
+			
 			Utils util = new Utils();
 			BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
 			String encodedId = util.sha256(file.getName() + "/" + attr.creationTime().toString() + "/" + file.getAbsolutePath());
+			
+			for(int i = 0; i < chunks.size(); i++) {
+				String currentChunkId = encodedId + " ChunkNo: " + i;
+				File currChunk = new File("/chunkas/" + currentChunkId);
+			}
 		}
 		catch (IOException e) {
 			e.printStackTrace();
 			return false;
-		}
-		for(int i = 0; i < peers; i++) {
-			
 		}
 		return true;
 	}

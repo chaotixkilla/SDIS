@@ -173,7 +173,7 @@ public class TestApp {
 				default:
 					break;
 			}
-			/*
+			
 			//SHA256 tests
 			System.out.println("\n\nTesting SHA256:\n");
 			FileObject file = new FileObject("123", "/home/Desktop/sdis/bin/Ademar.jpg", "28/03/2018");
@@ -200,6 +200,10 @@ public class TestApp {
 			Path path = Paths.get(cenaspath);
 			System.out.println(splitter.readFile(cenaspath));
 			*/
+			
+			//FileSplitter fileSaviour() method tests
+			System.out.println("\n\nTesting FileSplitter.fileSaviour() method:\n");
+			splitter.fileSavior(chunks, 0, cenas);
 			
 		}
 		catch(Exception e) {
