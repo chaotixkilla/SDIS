@@ -74,22 +74,14 @@ public class BackupChannel extends DefaultChannel {
 			Header header = msg.getHeader();
 			String[] headerArgs = header.getHeaderString().split(" ");
 			
-<<<<<<< HEAD
-			if(headerArgs[2].equals(this.getServer().getServerID())) {
+			if(!headerArgs[2].equals(this.getServer().getServerID())) {
+				System.out.println("\n\nPois\n");
 				return;
 			}
 			else {
-				System.out.println("HERE");
+				//System.out.println("HERE");
 				//Chunk chunk = new Chunk(headerArgs[3], Integer.parseInt(headerArgs[4]), msg.getBody().getBody());
-				FileOutputStream chunkFile = new FileOutputStream(headerArgs[4]);
-				chunkFile.write(msg.getBody().getBody());
-				chunkFile.close();
-				Thread.sleep(n);
-				Backup.respond(this.getServer().getMC(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), headerArgs[3], headerArgs[4]);
 				
-			}
-			
-=======
 			/*
 			headerArgs[0] = message type
 			headerArgs[1] = protocol version
@@ -123,9 +115,11 @@ public class BackupChannel extends DefaultChannel {
 			
 			Thread.sleep(n);
 			Backup.respond(this.getServer().getMC(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), headerArgs[3], headerArgs[4]);
->>>>>>> euzinho_no_meu_branch
-		} catch(IOException e) {
-			
+			}
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+			return;
 		}
 	}
 
