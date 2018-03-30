@@ -67,9 +67,9 @@ public class FileSplitter {
 	    }
 	*/
 	
-	public ArrayList<byte[]> split(File file) {
+	public ArrayList<Chunk> split(File file) {
 		
-		ArrayList<byte[]> chunks = new ArrayList<byte[]>();
+		ArrayList<Chunk> chunks = new ArrayList<Chunk>();
 		
 		try {
 		
@@ -80,11 +80,16 @@ public class FileSplitter {
 		String path = file.getAbsolutePath();
 		String data = readFile(path);
 		
+		String fileId = name + "/" + date + "/" + path;
+		Utils util = new Utils();
+		fileId = util.sha256(fileId);
+		
 		System.out.println("\nFILE SIZE: " + file.length());
 		
 		int size = 64000;
 		for(int i = 0; i*size < file.length(); i++) {
-			byte[] chunk = Arrays.copyOfRange(data.getBytes(), i*size, toIntExact(Math.min(file.length(), (i+1)*size)));
+			byte[] chunkData = Arrays.copyOfRange(data.getBytes(), i*size, toIntExact(Math.min(file.length(), (i+1)*size)));
+			Chunk chunk = new Chunk(fileId, i, chunkData);
 			chunks.add(chunk);
 			}
 		}

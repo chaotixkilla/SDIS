@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import channels.BackupChannel;
 import channels.ControlChannel;
+import files.Chunk;
 import files.FileSplitter;
 import messages.Body;
 import messages.Header;
@@ -30,11 +31,11 @@ public class Backup {
 			
 			File backedUpFile = new File(filePath);
 			FileSplitter splitter = new FileSplitter();
-			ArrayList<byte[]> chunks = splitter.split(backedUpFile);
+			ArrayList<Chunk> chunks = splitter.split(backedUpFile);
 			
 			for(int i = 0; i < chunks.size(); i++) {
 				Header header = new Header("PUTCHUNK", protocolVersion, serverID, filePath, Integer.toString(i), replicationDegree);
-				Body body = new Body(chunks.get(i));
+				Body body = new Body(chunks.get(i).getData());
 				Message msg = new Message(header, body);
 				MDB.sendMessage(msg.getMessage());
 			}

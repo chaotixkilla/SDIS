@@ -18,6 +18,12 @@ public class Chunk {
 		this.id = new Pair(fileId, chunkNo);
 	}
 	
+	public Chunk(String fileId, int chunkNo, byte[] data) {
+		Integer no = new Integer(chunkNo);
+		this.id = new Pair(fileId, chunkNo);
+		this.data = data;
+	}
+	
 	public Chunk(String fileId, int chunkNo, int replicationDegree) {
 		Integer no = new Integer(chunkNo);
 		this.id = new Pair(fileId, chunkNo);
