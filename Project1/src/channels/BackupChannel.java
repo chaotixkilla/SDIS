@@ -66,7 +66,6 @@ public class BackupChannel extends DefaultChannel {
 	
 	public void backupChunk(Message msg) throws InterruptedException {
 		try {
-			//random delay
 			Random r = new Random();
 			int n = r.nextInt(400) + 1;
 			//System.out.println(Integer.toString(n));
@@ -96,16 +95,20 @@ public class BackupChannel extends DefaultChannel {
 			System.out.println("headerArgs[4]: " + headerArgs[4]);
 			System.out.println("headerArgs[5]: " + headerArgs[5]);
 					
-			//File folder = new File("/backup/" + headerArgs[2] + "/" + headerArgs[3]);
-			File folder = new File("backup/" + headerArgs[2] + "/" + headerArgs[3] + "/" + headerArgs[4]);
-			if(!folder.mkdirs()) {
-				System.out.println("BackupChannel: backupChunk(): mkdir() failed, life is meaningless.");
+			String path = "backup" + File.separator + headerArgs[2] + File.separator + headerArgs[3] + File.separator + headerArgs[4];
+			File chunkFile = new File(path);
+
+			if(!chunkFile.getParentFile().mkdirs()) {
+				System.out.println("BackupChannel: backupChunk(): mkdirs() failed, life is meaningless.");
 				//return;
 			}
-			//folder.mkdir();
-			System.out.println(System.getProperty("user.dir"));
-			System.out.println(folder.getAbsolutePath());
-			Files.write(folder.toPath(), msg.getBody().getBody());
+			
+			if(!chunkFile.createNewFile()) {
+				System.out.println("BackupChannel: backupChunk(): createNewFile() failed, life is meaningless.");
+				//return;
+			}
+			
+			Files.write(chunkFile.toPath(), msg.getBody().getBody());
 			
 			/*
 			FileOutputStream chunkFile = new FileOutputStream(headerArgs[4]);
