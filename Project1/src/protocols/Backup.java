@@ -36,6 +36,13 @@ public class Backup {
 			for(int i = 0; i < chunks.size(); i++) {
 				Header header = new Header("PUTCHUNK", protocolVersion, serverID, filePath, Integer.toString(i), replicationDegree);
 				Body body = new Body(chunks.get(i).getData());
+				
+				System.out.println("\n\nPrint Debugging Extravaganza:");
+				System.out.println("chunkNo: " + chunks.get(i).getChunkNo());
+				System.out.println("chunkId: " + chunks.get(i).getFileId());
+				System.out.println("i: " + i);
+				System.out.println("Header: " + header);
+				
 				Message msg = new Message(header, body);
 				MDB.sendMessage(msg.getMessage());
 			}

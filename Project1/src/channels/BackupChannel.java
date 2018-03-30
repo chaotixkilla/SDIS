@@ -1,8 +1,12 @@
 package channels;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Random;
 
 import interfaces.Server;
@@ -69,9 +73,38 @@ public class BackupChannel extends DefaultChannel {
 			Header header = msg.getHeader();
 			Body body = msg.getBody();
 			String[] headerArgs = header.getHeaderString().split(" ");
+			
+			/*
+			headerArgs[0] = message type
+			headerArgs[1] = protocol version
+			headerArgs[2] = serverId
+			headerArgs[3] = fileId
+			headerArgs[4] = chunkNo
+			headerArgs[5] = replication degree
+			*/
+			System.out.println("headerArgs[1]: " + headerArgs[1]);
+			System.out.println("headerArgs[2]: " + headerArgs[2]);
+			System.out.println("headerArgs[3]: " + headerArgs[3]);
+			System.out.println("headerArgs[4]: " + headerArgs[4]);
+			System.out.println("headerArgs[5]: " + headerArgs[5]);
+					
+			//File folder = new File("/backup/" + headerArgs[2] + "/" + headerArgs[3]);
+			File folder = new File("backup/" + headerArgs[2] + "/" + headerArgs[3] + "/" + headerArgs[4]);
+			if(!folder.mkdirs()) {
+				System.out.println("BackupChannel: backupChunk(): mkdir() failed, life is meaningless.");
+				//return;
+			}
+			//folder.mkdir();
+			System.out.println(System.getProperty("user.dir"));
+			System.out.println(folder.getAbsolutePath());
+			Files.write(folder.toPath(), msg.getBody().getBody());
+			
+			/*
 			FileOutputStream chunkFile = new FileOutputStream(headerArgs[4]);
 			chunkFile.write(msg.getBody().getBody());
 			chunkFile.close();
+			*/
+			
 			Thread.sleep(n);
 			Backup.respond(this.getServer().getMC(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), headerArgs[3], headerArgs[4]);
 		} catch(IOException e) {
