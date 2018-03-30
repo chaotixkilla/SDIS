@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 import channels.BackupChannel;
 import channels.ControlChannel;
@@ -45,12 +46,17 @@ public class Backup {
 		}
 	}
 	
-	public static void respond(ControlChannel MC, String protocolVersion, String serverID, String fileID, String chunkNum) {
+	public static void respond(ControlChannel MC, String protocolVersion, String serverID, String fileID, String chunkNum) throws InterruptedException {
 		try {
 			Header header = new Header("STORED", protocolVersion, serverID, fileID, chunkNum);
 			
 			Message msg;
 			msg = new Message(header);
+			
+			//random delay
+			/*Random r = new Random();
+			int n = r.nextInt(400) + 1;
+			Thread.sleep(n);*/
 			MC.sendMessage(msg.getMessage());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

@@ -1,10 +1,12 @@
 package channels;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.util.Random;
 
+import files.Chunk;
 import interfaces.Server;
 import messages.Body;
 import messages.Header;
@@ -24,7 +26,7 @@ public class BackupChannel extends DefaultChannel {
 		
 		while(true) {
 			try {
-				byte[] buffer = new byte[512];
+				byte[] buffer = new byte[128];
 				DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 				
 				this.getSocket().receive(packet);
@@ -67,13 +69,22 @@ public class BackupChannel extends DefaultChannel {
 			//System.out.println(Integer.toString(n));
 			
 			Header header = msg.getHeader();
-			Body body = msg.getBody();
 			String[] headerArgs = header.getHeaderString().split(" ");
-			FileOutputStream chunkFile = new FileOutputStream(headerArgs[4]);
-			chunkFile.write(msg.getBody().getBody());
-			chunkFile.close();
-			Thread.sleep(n);
-			Backup.respond(this.getServer().getMC(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), headerArgs[3], headerArgs[4]);
+			
+			if(headerArgs[2].equals(this.getServer().getServerID())) {
+				return;
+			}
+			else {
+				System.out.println("HERE");
+				//Chunk chunk = new Chunk(headerArgs[3], Integer.parseInt(headerArgs[4]), msg.getBody().getBody());
+				FileOutputStream chunkFile = new FileOutputStream(headerArgs[4]);
+				chunkFile.write(msg.getBody().getBody());
+				chunkFile.close();
+				Thread.sleep(n);
+				Backup.respond(this.getServer().getMC(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), headerArgs[3], headerArgs[4]);
+				
+			}
+			
 		} catch(IOException e) {
 			
 		}
