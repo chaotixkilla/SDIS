@@ -1,7 +1,9 @@
 package channels;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.util.Random;
 
 import interfaces.Server;
 import messages.Body;
@@ -43,7 +45,8 @@ public class BackupChannel extends DefaultChannel {
 					switch(msgHeaderParts[0]) {
 						case "PUTCHUNK":
 							//puts the chunk
-							Backup.respond(this.getServer().getMC(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), "fileID", "chunkNum");
+							this.backupChunk(msg);
+							//Backup.respond(this.getServer().getMC(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), "fileID", "chunkNum");
 							break;
 						default:
 							break;
@@ -53,6 +56,26 @@ public class BackupChannel extends DefaultChannel {
 			catch(Exception e) {
 				
 			}
+		}
+	}
+	
+	public void backupChunk(Message msg) throws InterruptedException {
+		try {
+			//random delay
+			Random r = new Random();
+			int n = r.nextInt(400) + 1;
+			//System.out.println(Integer.toString(n));
+			
+			Header header = msg.getHeader();
+			Body body = msg.getBody();
+			String[] headerArgs = header.getHeaderString().split(" ");
+			FileOutputStream chunkFile = new FileOutputStream(headerArgs[4]);
+			chunkFile.write(msg.getBody().getBody());
+			chunkFile.close();
+			Thread.sleep(n);
+			Backup.respond(this.getServer().getMC(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), headerArgs[3], headerArgs[4]);
+		} catch(IOException e) {
+			
 		}
 	}
 

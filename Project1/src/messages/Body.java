@@ -7,6 +7,10 @@ public class Body {
 		this.body = body.getBytes();
 	}
 	
+	public Body(byte[] body) {
+		this.body = body;
+	}
+	
 	public byte[] getBody() {
 		return this.body;
 	}

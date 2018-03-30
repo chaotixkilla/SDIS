@@ -40,7 +40,7 @@ public class Message {
 		//System.out.println("Body: " + message[1]);
 		
 		this.header = new Header(message[0]);
-		if(this.body != null) {
+		if(this.body == null) {
 			this.body = new Body(message[1]);
 		}
 	}
