@@ -82,9 +82,9 @@ public class FileSplitter {
 		
 		String fileId = name + "/" + date + "/" + path;
 		Utils util = new Utils();
-		fileId = util.sha256(fileId);
+		fileId = util.sha256(name);
 		
-		System.out.println("\nFILE SIZE: " + file.length());
+		//System.out.println("\nFILE SIZE: " + file.length());
 		
 		int size = 64000;
 		for(int i = 0; i*size < file.length(); i++) {

@@ -16,20 +16,12 @@ import messages.Message;
 
 public class Backup {
 	
-	public Backup() {
+	private Backup() {
 		
 	}
 	
 	public static void send(BackupChannel MDB, String protocolVersion, String serverID, String filePath, String replicationDegree) {
-		try {
-			/*Header header = new Header("PUTCHUNK", protocolVersion, serverID, filePath, "0", replicationDegree);
-			Body body = new Body("fsdafdsaf");
-			
-			Message msg;
-			msg = new Message(header, body);
-			MDB.sendMessage(msg.getMessage());*/
-			//String path = "backup/" + serverID + "/";
-			
+		try {			
 			File backedUpFile = new File(filePath);
 			FileSplitter splitter = new FileSplitter();
 			ArrayList<Chunk> chunks = splitter.split(backedUpFile);
@@ -37,6 +29,7 @@ public class Backup {
 			for(int j = 0; j < 5; j++) {
 				for(int i = 0; i < chunks.size(); i++) {
 					Header header = new Header("PUTCHUNK", protocolVersion, serverID, chunks.get(i).getFileId(), Integer.toString(i), replicationDegree);
+					//Header header = new Header("PUTCHUNK", protocolVersion, serverID, filePath, Integer.toString(i), replicationDegree);
 					Body body = new Body(chunks.get(i).getData());
 					
 					/*System.out.println("\n\nPrint Debugging Extravaganza:");

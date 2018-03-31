@@ -40,23 +40,15 @@ public class BackupChannel extends DefaultChannel {
 				Header msgHeader = msg.getHeader();
 				Body msgBody = msg.getBody();
 				
-				//System.out.println("213: " + msgHeader.getHeaderString());
-				
 				String[] msgHeaderParts = msgHeader.getHeaderString().split(" ");
 				
-				//check version and ID
-				//if(msgHeaderParts[1].equals(this.getServer().getProtocolVersion()) 
-						//&& msgHeaderParts[2].equals(this.getServer().getServerID())) {
-					switch(msgHeaderParts[0]) {
-						case "PUTCHUNK":
-							//puts the chunk
-							this.backupChunk(msg);
-							//Backup.respond(this.getServer().getMC(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), "fileID", "chunkNum");
-							break;
-						default:
-							break;
-					}
-				//}
+				switch(msgHeaderParts[0]) {
+					case "PUTCHUNK":
+						this.backupChunk(msg);
+						break;
+					default:
+						break;
+				}
 			}
 			catch(Exception e) {
 				
@@ -68,38 +60,25 @@ public class BackupChannel extends DefaultChannel {
 		try {
 			Random r = new Random();
 			int n = r.nextInt(400) + 1;
-			//System.out.println(Integer.toString(n));
 			
 			Header header = msg.getHeader();
 			String[] headerArgs = header.getHeaderString().split(" ");
 			
-			//System.out.println("from server " + headerArgs[2]);
-			//System.out.println("server " + this.getServer().getServerID());
-			
 			if(headerArgs[2].equals(this.getServer().getServerID())) {
-				//System.out.println("server " + this.getServer().getServerID());
 				//return;
 			}
 			else {
-				//System.out.println("HERE");
 				//Chunk chunk = new Chunk(headerArgs[3], Integer.parseInt(headerArgs[4]), msg.getBody().getBody());
 					
 				String path = "backup" + File.separator + this.getServer().getServerID() + File.separator + headerArgs[3] + File.separator + headerArgs[4];
 				File chunkFile = new File(path);
 
 				if(!chunkFile.getParentFile().mkdirs()) {
-					//System.out.println("BackupChannel: backupChunk(): mkdirs() failed, life is meaningless.");
 					//return;
 				}
-			
-				/*if(!chunkFile.createNewFile()) {
-					//System.out.println("BackupChannel: backupChunk(): createNewFile() failed, life is meaningless.");
-					//return;
-				}*/
 				
 				if(chunkFile.exists() && !chunkFile.isDirectory()) { 
 					//it is already stored
-				    //System.out.println("That chunk is already stored");
 				}
 				else {
 					System.out.println("Storing chunk number " + headerArgs[4] + " on server " + this.getServer().getServerID());

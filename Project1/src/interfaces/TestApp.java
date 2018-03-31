@@ -169,6 +169,9 @@ public class TestApp {
 				case "BACKUP":
 					client.backup(testapp.firstOperand, testapp.secondOperand);
 					break;
+				case "DELETE":
+					client.delete(testapp.firstOperand);
+					break;
 				case "RESTORE":
 					client.restore(testapp.firstOperand);
 				default:

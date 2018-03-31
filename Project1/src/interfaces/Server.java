@@ -12,6 +12,7 @@ import messages.Body;
 import messages.Header;
 import messages.Message;
 import protocols.Backup;
+import protocols.Delete;
 import protocols.Restore;
 
 import java.io.IOException;
@@ -170,5 +171,10 @@ public class Server implements ClientInterface{
 	public void restore(String fileName) throws IOException {
 		// TODO Auto-generated method stub
 		Restore.send(this.MC, this.protocolVersion, this.serverID, fileName);
+	}
+	
+	@Override
+	public void delete(String fileName) throws IOException {
+		Delete.send(this.MC, this.protocolVersion, this.serverID, fileName);
 	}
 }

@@ -1,5 +1,6 @@
 package channels;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 
@@ -21,11 +22,16 @@ public class ControlChannel extends DefaultChannel {
 		System.out.println("Control Thread initiated!");
 		
 		while(true) {
-			try {
 				byte[] buffer = new byte[65535];
 				DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 				
-				this.getSocket().receive(packet);
+				try {
+					this.getSocket().receive(packet);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 				//String received = new String(packet.getData(), 0, packet.getLength());
 				//System.out.println("MC received: " + received);
 				
@@ -33,30 +39,55 @@ public class ControlChannel extends DefaultChannel {
 				Header msgHeader = msg.getHeader();
 				
 				String[] msgHeaderParts = msgHeader.getHeaderString().split(" ");
-				System.out.println(msgHeaderParts[0]);
 				
-				//check version and ID
-				//if(msgHeaderParts[1].equals(this.getServer().getProtocolVersion()) 
-						//&& msgHeaderParts[2].equals(this.getServer().getServerID())) {
-					switch(msgHeaderParts[0]) {
-						case "STORED":
-							System.out.println("HERE");
-							break;
-						case "GETCHUNK":
-							//gets the chunk
-							Restore.respond(this.getServer().getMDR(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), "fileID", "chunkNum");
-							break;
-						default:
-							break;
-					}
-				//}
-			}
-			catch(Exception e) {
 				
-			}
+				switch(msgHeaderParts[0]) {
+					case "STORED":
+						//System.out.println("HERE");
+						break;
+					case "DELETE":
+						this.delete(msg);
+						break;
+					case "GETCHUNK":
+						//gets the chunk
+						Restore.respond(this.getServer().getMDR(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), "fileID", "chunkNum");
+						break;
+					default:
+						break;
+				}
+			
 		}
 	}
 	
+	public void delete(Message msg) {
+		// TODO Auto-generated method stub
+		
+		Header header = msg.getHeader();
+		String[] headerArgs = header.getHeaderString().split(" ");
+		
+		String path = "backup/" + headerArgs[2] + "/" + headerArgs[3];
+		File file = new File(path);
+		
+		if(file.isDirectory()) {
+			if(file.list().length == 0) {
+				file.delete();
+				System.out.println("File successfully deleted from server " + headerArgs[2]);
+			}
+			else {
+				String[] entries = file.list();
+				for(String s: entries) {
+					File file2 = new File(file.getPath(), s);
+					file2.delete();
+				}
+				
+				if(file.list().length == 0) {
+					file.delete();
+					System.out.println("File successfully deleted from server " + headerArgs[2]);
+				}
+			}
+		}
+	}
+
 	public void restore() {
 		
 	}

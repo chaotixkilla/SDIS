@@ -9,6 +9,10 @@ import messages.Header;
 import messages.Message;
 
 public class Restore {
+	
+	private Restore() {
+		
+	}
 
 	public static void send(ControlChannel MC, String protocolVersion, String serverID, String fileName) {
 		// TODO Auto-generated method stub

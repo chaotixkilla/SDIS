@@ -25,7 +25,13 @@ public class Message {
 	public Message(Header header) {
 		this.header = header;
 		this.body = null;
-		this.message = header.getHeader();
+		
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		outputStream.write(header.getHeader(), 0, header.getHeader().length);
+		outputStream.write(" \r\n\r\n".getBytes(), 0, " \r\n\r\n".length());
+		
+		byte[] message = outputStream.toByteArray();
+		this.message = message;
 	}
 	
 	public Message(String s) {
@@ -40,8 +46,11 @@ public class Message {
 		//System.out.println("Body: " + message[1]);
 		
 		this.header = new Header(message[0]);
-		if(this.body == null) {
+		try {
 			this.body = new Body(message[1]);
+		}
+		catch (ArrayIndexOutOfBoundsException e) {
+			this.body = null;
 		}
 	}
 	
