@@ -22,12 +22,12 @@ public class ControlChannel extends DefaultChannel {
 		
 		while(true) {
 			try {
-				byte[] buffer = new byte[512];
+				byte[] buffer = new byte[65535];
 				DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 				
 				this.getSocket().receive(packet);
-				String received = new String(packet.getData(), 0, packet.getLength());
-				System.out.println("MC received: " + received);
+				//String received = new String(packet.getData(), 0, packet.getLength());
+				//System.out.println("MC received: " + received);
 				
 				Message msg = new Message(packet);
 				Header msgHeader = msg.getHeader();

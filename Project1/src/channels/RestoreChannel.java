@@ -18,7 +18,7 @@ public class RestoreChannel extends DefaultChannel {
 		
 		while(true) {
 			try {
-				byte[] buffer = new byte[512];
+				byte[] buffer = new byte[65535];
 				DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 				
 				this.getSocket().receive(packet);

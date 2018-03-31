@@ -29,12 +29,12 @@ public class BackupChannel extends DefaultChannel {
 		
 		while(true) {
 			try {
-				byte[] buffer = new byte[128];
+				byte[] buffer = new byte[65535];
 				DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 				
 				this.getSocket().receive(packet);
-				String received = new String(packet.getData(), 0, packet.getLength());
-				System.out.println("MDB received: " + received);
+				//String received = new String(packet.getData(), 0, packet.getLength());
+				//System.out.println("MDB received: " + received);
 				
 				Message msg = new Message(packet);
 				Header msgHeader = msg.getHeader();
@@ -73,8 +73,8 @@ public class BackupChannel extends DefaultChannel {
 			Header header = msg.getHeader();
 			String[] headerArgs = header.getHeaderString().split(" ");
 			
-			System.out.println("from server " + headerArgs[2]);
-			System.out.println("server " + this.getServer().getServerID());
+			//System.out.println("from server " + headerArgs[2]);
+			//System.out.println("server " + this.getServer().getServerID());
 			
 			if(headerArgs[2].equals(this.getServer().getServerID())) {
 				//System.out.println("server " + this.getServer().getServerID());
@@ -84,23 +84,32 @@ public class BackupChannel extends DefaultChannel {
 				//System.out.println("HERE");
 				//Chunk chunk = new Chunk(headerArgs[3], Integer.parseInt(headerArgs[4]), msg.getBody().getBody());
 					
-			String path = "backup" + File.separator + this.getServer().getServerID() + File.separator + headerArgs[3] + File.separator + headerArgs[4];
-			File chunkFile = new File(path);
+				String path = "backup" + File.separator + this.getServer().getServerID() + File.separator + headerArgs[3] + File.separator + headerArgs[4];
+				File chunkFile = new File(path);
 
-			if(!chunkFile.getParentFile().mkdirs()) {
-				//System.out.println("BackupChannel: backupChunk(): mkdirs() failed, life is meaningless.");
-				//return;
-			}
+				if(!chunkFile.getParentFile().mkdirs()) {
+					//System.out.println("BackupChannel: backupChunk(): mkdirs() failed, life is meaningless.");
+					//return;
+				}
 			
-			if(!chunkFile.createNewFile()) {
-				//System.out.println("BackupChannel: backupChunk(): createNewFile() failed, life is meaningless.");
-				//return;
-			}
+				/*if(!chunkFile.createNewFile()) {
+					//System.out.println("BackupChannel: backupChunk(): createNewFile() failed, life is meaningless.");
+					//return;
+				}*/
+				
+				if(chunkFile.exists() && !chunkFile.isDirectory()) { 
+					//it is already stored
+				    //System.out.println("That chunk is already stored");
+				}
+				else {
+					System.out.println("Storing chunk number " + headerArgs[4] + " on server " + this.getServer().getServerID());
+					Files.write(chunkFile.toPath(), msg.getBody().getBody());
+					
+					Thread.sleep(n);
+					Backup.respond(this.getServer().getMC(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), headerArgs[3], headerArgs[4]);
+				
+				}
 			
-			Files.write(chunkFile.toPath(), msg.getBody().getBody());
-			
-			Thread.sleep(n);
-			Backup.respond(this.getServer().getMC(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), headerArgs[3], headerArgs[4]);
 			}
 		}
 		catch(IOException e) {

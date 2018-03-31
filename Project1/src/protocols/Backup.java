@@ -34,19 +34,21 @@ public class Backup {
 			FileSplitter splitter = new FileSplitter();
 			ArrayList<Chunk> chunks = splitter.split(backedUpFile);
 			
-			for(int i = 0; i < chunks.size(); i++) {
-				Header header = new Header("PUTCHUNK", protocolVersion, serverID, chunks.get(i).getFileId(), Integer.toString(i), replicationDegree);
-				Body body = new Body(chunks.get(i).getData());
-				
-				/*System.out.println("\n\nPrint Debugging Extravaganza:");
-				System.out.println("chunkNo: " + chunks.get(i).getChunkNo());
-				System.out.println("chunkId: " + chunks.get(i).getFileId());
-				System.out.println("i: " + i);
-				System.out.println("Header: " + header);*/
-				
-				Message msg = new Message(header, body);
-				Thread.sleep(200);
-				MDB.sendMessage(msg.getMessage());
+			for(int j = 0; j < 5; j++) {
+				for(int i = 0; i < chunks.size(); i++) {
+					Header header = new Header("PUTCHUNK", protocolVersion, serverID, chunks.get(i).getFileId(), Integer.toString(i), replicationDegree);
+					Body body = new Body(chunks.get(i).getData());
+					
+					/*System.out.println("\n\nPrint Debugging Extravaganza:");
+					System.out.println("chunkNo: " + chunks.get(i).getChunkNo());
+					System.out.println("chunkId: " + chunks.get(i).getFileId());
+					System.out.println("i: " + i);
+					System.out.println("Header: " + header);*/
+					
+					Message msg = new Message(header, body);
+					Thread.sleep(100);
+					MDB.sendMessage(msg.getMessage());
+				}
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
