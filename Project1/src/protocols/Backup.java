@@ -35,7 +35,7 @@ public class Backup {
 			ArrayList<Chunk> chunks = splitter.split(backedUpFile);
 			
 			for(int i = 0; i < chunks.size(); i++) {
-				Header header = new Header("PUTCHUNK", protocolVersion, serverID, filePath, Integer.toString(i), replicationDegree);
+				Header header = new Header("PUTCHUNK", protocolVersion, serverID, chunks.get(i).getFileId(), Integer.toString(i), replicationDegree);
 				Body body = new Body(chunks.get(i).getData());
 				
 				/*System.out.println("\n\nPrint Debugging Extravaganza:");

@@ -45,8 +45,8 @@ public class BackupChannel extends DefaultChannel {
 				String[] msgHeaderParts = msgHeader.getHeaderString().split(" ");
 				
 				//check version and ID
-				if(msgHeaderParts[1].equals(this.getServer().getProtocolVersion()) 
-						&& msgHeaderParts[2].equals(this.getServer().getServerID())) {
+				//if(msgHeaderParts[1].equals(this.getServer().getProtocolVersion()) 
+						//&& msgHeaderParts[2].equals(this.getServer().getServerID())) {
 					switch(msgHeaderParts[0]) {
 						case "PUTCHUNK":
 							//puts the chunk
@@ -56,7 +56,7 @@ public class BackupChannel extends DefaultChannel {
 						default:
 							break;
 					}
-				}
+				//}
 			}
 			catch(Exception e) {
 				
@@ -73,15 +73,18 @@ public class BackupChannel extends DefaultChannel {
 			Header header = msg.getHeader();
 			String[] headerArgs = header.getHeaderString().split(" ");
 			
-			if(!headerArgs[2].equals(this.getServer().getServerID())) {
-				//System.out.println("\n\nPois\n");
-				return;
+			System.out.println("from server " + headerArgs[2]);
+			System.out.println("server " + this.getServer().getServerID());
+			
+			if(headerArgs[2].equals(this.getServer().getServerID())) {
+				//System.out.println("server " + this.getServer().getServerID());
+				//return;
 			}
 			else {
 				//System.out.println("HERE");
 				//Chunk chunk = new Chunk(headerArgs[3], Integer.parseInt(headerArgs[4]), msg.getBody().getBody());
 					
-			String path = "backup" + File.separator + headerArgs[2] + File.separator + headerArgs[3] + File.separator + headerArgs[4];
+			String path = "backup" + File.separator + this.getServer().getServerID() + File.separator + headerArgs[3] + File.separator + headerArgs[4];
 			File chunkFile = new File(path);
 
 			if(!chunkFile.getParentFile().mkdirs()) {
@@ -95,12 +98,6 @@ public class BackupChannel extends DefaultChannel {
 			}
 			
 			Files.write(chunkFile.toPath(), msg.getBody().getBody());
-			
-			/*
-			FileOutputStream chunkFile = new FileOutputStream(headerArgs[4]);
-			chunkFile.write(msg.getBody().getBody());
-			chunkFile.close();
-			*/
 			
 			Thread.sleep(n);
 			Backup.respond(this.getServer().getMC(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), headerArgs[3], headerArgs[4]);
