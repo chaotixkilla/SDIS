@@ -33,11 +33,15 @@ public class ControlChannel extends DefaultChannel {
 				Header msgHeader = msg.getHeader();
 				
 				String[] msgHeaderParts = msgHeader.getHeaderString().split(" ");
+				System.out.println(msgHeaderParts[0]);
 				
 				//check version and ID
-				if(msgHeaderParts[1].equals(this.getServer().getProtocolVersion()) 
-						&& msgHeaderParts[2].equals(this.getServer().getServerID())) {
+				//if(msgHeaderParts[1].equals(this.getServer().getProtocolVersion()) 
+						//&& msgHeaderParts[2].equals(this.getServer().getServerID())) {
 					switch(msgHeaderParts[0]) {
+						case "STORED":
+							System.out.println("HERE");
+							break;
 						case "GETCHUNK":
 							//gets the chunk
 							Restore.respond(this.getServer().getMDR(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), "fileID", "chunkNum");
@@ -45,7 +49,7 @@ public class ControlChannel extends DefaultChannel {
 						default:
 							break;
 					}
-				}
+				//}
 			}
 			catch(Exception e) {
 				

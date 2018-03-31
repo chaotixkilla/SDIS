@@ -38,16 +38,20 @@ public class Backup {
 				Header header = new Header("PUTCHUNK", protocolVersion, serverID, filePath, Integer.toString(i), replicationDegree);
 				Body body = new Body(chunks.get(i).getData());
 				
-				System.out.println("\n\nPrint Debugging Extravaganza:");
+				/*System.out.println("\n\nPrint Debugging Extravaganza:");
 				System.out.println("chunkNo: " + chunks.get(i).getChunkNo());
 				System.out.println("chunkId: " + chunks.get(i).getFileId());
 				System.out.println("i: " + i);
-				System.out.println("Header: " + header);
+				System.out.println("Header: " + header);*/
 				
 				Message msg = new Message(header, body);
+				Thread.sleep(200);
 				MDB.sendMessage(msg.getMessage());
 			}
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

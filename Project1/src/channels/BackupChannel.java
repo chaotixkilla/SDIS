@@ -74,37 +74,23 @@ public class BackupChannel extends DefaultChannel {
 			String[] headerArgs = header.getHeaderString().split(" ");
 			
 			if(!headerArgs[2].equals(this.getServer().getServerID())) {
-				System.out.println("\n\nPois\n");
+				//System.out.println("\n\nPois\n");
 				return;
 			}
 			else {
 				//System.out.println("HERE");
 				//Chunk chunk = new Chunk(headerArgs[3], Integer.parseInt(headerArgs[4]), msg.getBody().getBody());
-				
-			/*
-			headerArgs[0] = message type
-			headerArgs[1] = protocol version
-			headerArgs[2] = serverId
-			headerArgs[3] = fileId
-			headerArgs[4] = chunkNo
-			headerArgs[5] = replication degree
-			*/
-			System.out.println("headerArgs[1]: " + headerArgs[1]);
-			System.out.println("headerArgs[2]: " + headerArgs[2]);
-			System.out.println("headerArgs[3]: " + headerArgs[3]);
-			System.out.println("headerArgs[4]: " + headerArgs[4]);
-			System.out.println("headerArgs[5]: " + headerArgs[5]);
 					
 			String path = "backup" + File.separator + headerArgs[2] + File.separator + headerArgs[3] + File.separator + headerArgs[4];
 			File chunkFile = new File(path);
 
 			if(!chunkFile.getParentFile().mkdirs()) {
-				System.out.println("BackupChannel: backupChunk(): mkdirs() failed, life is meaningless.");
+				//System.out.println("BackupChannel: backupChunk(): mkdirs() failed, life is meaningless.");
 				//return;
 			}
 			
 			if(!chunkFile.createNewFile()) {
-				System.out.println("BackupChannel: backupChunk(): createNewFile() failed, life is meaningless.");
+				//System.out.println("BackupChannel: backupChunk(): createNewFile() failed, life is meaningless.");
 				//return;
 			}
 			
