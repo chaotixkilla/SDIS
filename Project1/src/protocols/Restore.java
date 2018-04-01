@@ -2,6 +2,7 @@ package protocols;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 
 import channels.ControlChannel;
 import channels.RestoreChannel;
@@ -41,13 +42,17 @@ public class Restore {
 		}
 	}
 
-	public static void respond(RestoreChannel MDR, String protocolVersion, String serverID, String fileID, String chunkNum, byte[] data) {
+	public static void respond(RestoreChannel MDR, String protocolVersion, String serverID, String fileID, String chunkNum, byte[] data) throws InterruptedException {
 		// TODO Auto-generated method stub
 		try {
-			System.out.println("HERE");
+			Random r = new Random();
+			int n = r.nextInt(400) + 1;
+			
 			Header header = new Header("CHUNK", protocolVersion, serverID, fileID, chunkNum);
 			Body body = new Body(data);
 			Message msg = new Message(header, body);
+			
+			Thread.sleep(n);
 			MDR.sendMessage(msg.getMessage());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

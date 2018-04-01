@@ -54,7 +54,12 @@ public class ControlChannel extends DefaultChannel {
 						this.delete(msg);
 						break;
 					case "GETCHUNK":
-						this.restore(msg);
+						try {
+							this.restore(msg);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 						//Restore.respond(this.getServer().getMDR(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), "fileID", "chunkNum");
 						break;
 					default:
@@ -93,16 +98,15 @@ public class ControlChannel extends DefaultChannel {
 		}
 	}
 
-	public void restore(Message msg) {
+	public void restore(Message msg) throws InterruptedException {
 		try {
 			Utils utils = new Utils();
 			Header header = msg.getHeader();
 			String[] headerArgs = header.getHeaderString().split(" ");
 			
-			byte[] data = new byte[65000];
-			
 			String path = "backup/" + headerArgs[2] + "/" + headerArgs[3] + "/" + headerArgs[4];
 			if(new File(path).exists()) {
+				byte[] data = new byte[(int) new File(path).length()];
 				FileInputStream input = new FileInputStream(path);
 				input.read(data);
 				Restore.respond(this.getServer().getMDR(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), headerArgs[3], headerArgs[4], data);

@@ -3,11 +3,14 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import channels.BackupChannel;
 import channels.ControlChannel;
 import channels.RestoreChannel;
+import files.Chunk;
 import messages.Body;
 import messages.Header;
 import messages.Message;
@@ -26,6 +29,8 @@ public class Server implements ClientInterface{
 	private BackupChannel MDB;
 	private RestoreChannel MDR;
 	
+	private HashMap<Integer, Chunk> fileRestoring;
+	private HashMap<String, HashMap<Integer, Chunk>> database;
 
 	protected Server(String[] args) throws IOException{
 		this.protocolVersion = this.checkValidProtocol(args[0]);
@@ -43,6 +48,8 @@ public class Server implements ClientInterface{
 		String mdrIP = this.checkValidIP(args[7]);
 		String mdrPort = this.checkValidPort(args[8]);
 		this.MDR = new RestoreChannel(mdrIP, mdrPort, this);
+		
+		this.fileRestoring = new HashMap<Integer, Chunk>();
 		
 		System.out.println("Creating server (ID = " + this.serverID + ") using protocol " + this.protocolVersion 
 				+ " with the following information:");
@@ -131,6 +138,14 @@ public class Server implements ClientInterface{
 	
 	public RestoreChannel getMDR() {
 		return this.MDR;
+	}
+	
+	public HashMap<Integer, Chunk> getFileRestoring(){
+		return this.fileRestoring;
+	}
+	
+	public void fileRestoringAdd(int chunkNum, Chunk chunk) {
+		this.fileRestoring.put(chunkNum, chunk);
 	}
 	
 	@Override

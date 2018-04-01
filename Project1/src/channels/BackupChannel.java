@@ -82,6 +82,7 @@ public class BackupChannel extends DefaultChannel {
 				}
 				else {
 					System.out.println("Storing chunk number " + headerArgs[4] + " on server " + this.getServer().getServerID());
+					
 					Files.write(chunkFile.toPath(), msg.getBody().getBody());
 					
 					Thread.sleep(n);
