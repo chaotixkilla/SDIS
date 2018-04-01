@@ -45,7 +45,7 @@ public class FileSplitter {
 		
 		try {
 			byte[] encoded = Files.readAllBytes(Paths.get(path));
-			output = new String(encoded, Charset.defaultCharset());
+			output = new String(encoded, Charset.forName("ISO_8859_1"));
 		}
 		catch (IOException e) {
 			e.printStackTrace();
