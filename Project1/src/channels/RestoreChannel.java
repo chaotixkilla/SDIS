@@ -22,8 +22,8 @@ public class RestoreChannel extends DefaultChannel {
 				DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 				
 				this.getSocket().receive(packet);
-				String received = new String(packet.getData(), 0, packet.getLength());
-				System.out.println("MDR received: " + received);
+				//String received = new String(packet.getData(), 0, packet.getLength());
+				//System.out.println("MDR received: " + received);
 			}
 			catch(Exception e) {
 				

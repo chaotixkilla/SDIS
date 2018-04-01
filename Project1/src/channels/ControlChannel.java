@@ -1,14 +1,19 @@
 package channels;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 
 import interfaces.Server;
+import messages.Body;
 import messages.Header;
 import messages.Message;
 import protocols.Backup;
 import protocols.Restore;
+import utilities.Utils;
 
 public class ControlChannel extends DefaultChannel {
 
@@ -32,8 +37,8 @@ public class ControlChannel extends DefaultChannel {
 					e.printStackTrace();
 				}
 				
-				//String received = new String(packet.getData(), 0, packet.getLength());
-				//System.out.println("MC received: " + received);
+				String received = new String(packet.getData(), 0, packet.getLength());
+				System.out.println("MC received: " + received);
 				
 				Message msg = new Message(packet);
 				Header msgHeader = msg.getHeader();
@@ -49,8 +54,8 @@ public class ControlChannel extends DefaultChannel {
 						this.delete(msg);
 						break;
 					case "GETCHUNK":
-						//gets the chunk
-						Restore.respond(this.getServer().getMDR(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), "fileID", "chunkNum");
+						this.restore(msg);
+						//Restore.respond(this.getServer().getMDR(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), "fileID", "chunkNum");
 						break;
 					default:
 						break;
@@ -88,7 +93,24 @@ public class ControlChannel extends DefaultChannel {
 		}
 	}
 
-	public void restore() {
+	public void restore(Message msg) {
+		try {
+			Utils utils = new Utils();
+			Header header = msg.getHeader();
+			String[] headerArgs = header.getHeaderString().split(" ");
+			
+			byte[] data = new byte[65000];
+			
+			String path = "backup/" + headerArgs[2] + "/" + headerArgs[3] + "/" + headerArgs[4];
+			if(new File(path).exists()) {
+				FileInputStream input = new FileInputStream(path);
+				input.read(data);
+				Restore.respond(this.getServer().getMDR(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), headerArgs[3], headerArgs[4], data);
+			}
+		} catch (IOException e) {
+			
+		}
+		
 		
 	}
 
