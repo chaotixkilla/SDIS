@@ -83,7 +83,10 @@ public class BackupChannel extends DefaultChannel {
 				else {
 					System.out.println("Storing chunk number " + headerArgs[4] + " on server " + this.getServer().getServerID());
 					
-					Files.write(chunkFile.toPath(), msg.getBody().getBody());
+					//Files.write(chunkFile.toPath(), msg.getBody().getBody());
+					
+					FileOutputStream fos = new FileOutputStream(chunkFile);
+					fos.write(msg.getBody().getBody());
 					
 					Thread.sleep(n);
 					Backup.respond(this.getServer().getMC(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), headerArgs[3], headerArgs[4]);

@@ -2,6 +2,7 @@ package files;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
@@ -40,17 +41,19 @@ public class FileSplitter {
 	
 	public String readFile(String path) { 
 		
-		String output = "";
+		//String output = "";
 		Charset encoding;
 		
 		try {
 			byte[] encoded = Files.readAllBytes(Paths.get(path));
-			output = new String(encoded, Charset.forName("ISO_8859_1"));
+			String output = new String(encoded, Charset.forName("ISO_8859_1"));
+			System.out.println(output);
+			return output;
 		}
 		catch (IOException e) {
 			e.printStackTrace();
 		}
-		return output;
+		return "";
 	}
 	
 	/*
@@ -78,7 +81,10 @@ public class FileSplitter {
 		String name = file.getName();
 		String date = attr.creationTime().toString();
 		String path = file.getAbsolutePath();
-		String data = readFile(path);
+		//String data = readFile(path);
+		byte[] buffer = new byte[(int)file.length()];
+		FileInputStream fis = new FileInputStream(file);
+		fis.read(buffer);
 		
 		String fileId = name + "/" + date + "/" + path;
 		Utils util = new Utils();
@@ -87,8 +93,8 @@ public class FileSplitter {
 		//System.out.println("\nFILE SIZE: " + file.length());
 		
 		int size = 64000;
-		for(int i = 0; i*size < file.length(); i++) {
-			byte[] chunkData = Arrays.copyOfRange(data.getBytes(), i*size, toIntExact(Math.min(file.length(), (i+1)*size)));
+			for(int i = 0; i*size < file.length(); i++) {
+			byte[] chunkData = Arrays.copyOfRange(buffer, i*size, toIntExact(Math.min(file.length(), (i+1)*size)));
 			Chunk chunk = new Chunk(fileId, i, chunkData);
 			chunks.add(chunk);
 			}
