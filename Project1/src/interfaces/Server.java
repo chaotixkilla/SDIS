@@ -322,7 +322,12 @@ public class Server implements ClientInterface{
 	@Override
 	public void reclaim(String storageAmount) {
 		int amount = Integer.parseInt(storageAmount);
-		this.maxStorageSize -= amount * 1000;
+		if(amount == 0) {
+			this.maxStorageSize = 0;
+		}
+		else {
+			this.maxStorageSize -= amount * 1000;
+		}
 		this.reorganizeDatabase();
 		//Reclaim.spaceReclaim(storageAmount);
 	}
