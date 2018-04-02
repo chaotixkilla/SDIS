@@ -174,6 +174,10 @@ public class TestApp {
 					break;
 				case "RESTORE":
 					client.restore(testapp.firstOperand);
+					break;
+				case "RECLAIM":
+					client.reclaim(testapp.firstOperand);
+					break;
 				default:
 					break;
 			}

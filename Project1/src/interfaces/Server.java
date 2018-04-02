@@ -5,6 +5,8 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import channels.BackupChannel;
@@ -16,6 +18,7 @@ import messages.Header;
 import messages.Message;
 import protocols.Backup;
 import protocols.Delete;
+import protocols.Reclaim;
 import protocols.Restore;
 
 import java.io.File;
@@ -33,16 +36,19 @@ public class Server implements ClientInterface{
 	private ControlChannel MC;
 	private BackupChannel MDB;
 	private RestoreChannel MDR;
-	private int storageSize;
+	private int maxStorageSize;
+	private int currentStorageSize;
 	
 	private HashMap<Integer, Chunk> fileRestoring;
+	private HashMap<Integer, Chunk> fileBacking;
 	private HashMap<String, HashMap<Integer, Chunk>> database;
 
 	protected Server(String[] args) throws IOException{
 		this.protocolVersion = this.checkValidProtocol(args[0]);
 		this.serverID = this.checkNumber(args[1]);
 		this.accessPoint = args[2];
-		this.storageSize = 10000000; //10MB
+		this.maxStorageSize = 10000000; //10MB
+		this.currentStorageSize = 0;
 		
 		String mcIP = this.checkValidIP(args[3]);
 		String mcPort = this.checkValidPort(args[4]);
@@ -57,6 +63,7 @@ public class Server implements ClientInterface{
 		this.MDR = new RestoreChannel(mdrIP, mdrPort, this);
 		
 		this.fileRestoring = new HashMap<Integer, Chunk>();
+		this.fileBacking = new HashMap<Integer, Chunk>();
 		this.database = new HashMap<String, HashMap<Integer, Chunk>>();		
 		
 		System.out.println("Creating server (ID = " + this.serverID + ") using protocol " + this.protocolVersion 
@@ -67,7 +74,7 @@ public class Server implements ClientInterface{
 		
 		System.out.println("Loading database...");
 		this.loadDatabase();
-		System.out.println("Server database loaded! Current available storage: " + (double)this.storageSize / 1000000 + " MB");
+		System.out.println("Server database loaded! Current available storage: " + (double)(this.maxStorageSize - this.currentStorageSize) / 1000 + " KB");
 	}
 	
 	public String checkValidProtocol(String protocol) {
@@ -160,10 +167,44 @@ public class Server implements ClientInterface{
 		this.fileRestoring.put(chunkNum, chunk);
 	}
 	
+	public HashMap<Integer, Chunk> getFileBacking(){
+		return this.fileBacking;
+	}
+	
+	public void fileBackingAdd(int chunkNum, Chunk chunk) {
+		this.fileBacking.put(chunkNum, chunk);
+	}
+	
+	public void resetFileBacking() {
+		this.fileBacking = new HashMap<Integer, Chunk>();
+	}
+	
+	public HashMap<String, HashMap<Integer, Chunk>> getDatabase(){
+		return this.database;
+	}
+	
+	public void putInDB(String key, HashMap<Integer, Chunk> value) {
+		this.database.put(key, value);
+	}
+	
+	public boolean canStore(byte[] array) {
+		if((this.maxStorageSize - this.currentStorageSize) >= array.length) {
+			return true;
+		}
+		return false;
+	}
+	
+	public int getCurrentStorage() {
+		return this.currentStorageSize;
+	}
+	
+	public void addToStorage(int i) {
+		this.currentStorageSize += i;
+	}
+	
 	public void loadDatabase() {
 		String path = "backup/" + this.serverID;
 		File file = new File(path);
-		int currentStorage = 0;
 		HashMap<String, HashMap<Integer, Chunk>> serverDB = new HashMap<String, HashMap<Integer, Chunk>>();
 		
 		if(file.exists() && file.isDirectory()) {
@@ -175,7 +216,7 @@ public class Server implements ClientInterface{
 					HashMap<Integer, Chunk> chunks = new HashMap<Integer, Chunk>();
 					for(File chunk : storedFileFolder.listFiles()) {
 						if(chunk.isFile()) {
-							currentStorage += (int)chunk.length();
+							this.currentStorageSize += (int)chunk.length();
 							byte[] buffer = new byte[(int)chunk.length()];
 							try {
 								FileInputStream content = new FileInputStream(chunk);
@@ -197,7 +238,40 @@ public class Server implements ClientInterface{
 		}
 		
 		this.database = serverDB;
-		this.storageSize -= currentStorage;
+	}
+	
+	public void reorganizeDatabase() {
+		String path = "backup/" + this.serverID;
+		File file = new File(path);
+		
+		
+		while(this.maxStorageSize < this.currentStorageSize) {
+	    	if(file.exists() && file.isDirectory()) {
+	    		String[] storedFiles = file.list();
+	    		for(String s : storedFiles) {
+	    			String subpath = path + "/" + s;
+					File storedFileFolder = new File(subpath);
+					if(storedFileFolder.exists() && storedFileFolder.isDirectory()) {
+						for(File chunk : storedFileFolder.listFiles()) {
+							System.out.println(this.database);
+							if(this.maxStorageSize >= this.currentStorageSize) {
+								return;
+							}
+							this.currentStorageSize -= chunk.length();
+							this.database.get(storedFileFolder.getName()).remove(Integer.parseInt(chunk.getName()));
+							chunk.delete();
+							Reclaim.send(this.MC, this.protocolVersion, this.serverID, storedFileFolder.getName(), chunk.getName());
+						}
+					}
+					if(storedFileFolder.exists() && storedFileFolder.list().length == 0) {
+						storedFileFolder.delete();
+					}
+	    		}
+	    	}
+	    	if(file.exists() && file.list().length == 0) {
+				file.delete();
+			}
+	    }
 	}
 	
 	@Override
@@ -243,5 +317,13 @@ public class Server implements ClientInterface{
 	@Override
 	public void delete(String fileName) throws IOException {
 		Delete.send(this.MC, this.protocolVersion, this.serverID, fileName);
+	}
+	
+	@Override
+	public void reclaim(String storageAmount) {
+		int amount = Integer.parseInt(storageAmount);
+		this.maxStorageSize -= amount * 1000;
+		this.reorganizeDatabase();
+		//Reclaim.spaceReclaim(storageAmount);
 	}
 }

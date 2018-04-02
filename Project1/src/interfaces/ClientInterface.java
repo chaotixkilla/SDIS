@@ -8,4 +8,5 @@ public interface ClientInterface extends Remote{
     public void backup(String filePath, String replicationDegree) throws IOException;
     public void restore(String fileName) throws IOException;
     public void delete(String fileName) throws IOException;
+    public void reclaim(String storageAmount) throws RemoteException;
 }

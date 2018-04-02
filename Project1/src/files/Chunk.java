@@ -46,6 +46,13 @@ public class Chunk {
 		this.data = data;
 	}
 	
+	public Chunk(String fileId, int chunkNo, int replicationDegree, byte[] data) {
+		Integer no = new Integer(chunkNo);
+		this.id = new Pair(fileId, chunkNo);
+		this.replicationDegree = replicationDegree;
+		this.data = data;
+	}
+	
 	public int getMaxSize() { return this.maxSize; }
 	public String getFileId() { return this.id.getLeft(); }
 	public int getChunkNo() { return this.id.getRight().intValue(); }

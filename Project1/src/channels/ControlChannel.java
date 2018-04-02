@@ -6,7 +6,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.util.HashMap;
+import java.util.Random;
 
+import files.Chunk;
 import interfaces.Server;
 import messages.Body;
 import messages.Header;
@@ -37,8 +40,8 @@ public class ControlChannel extends DefaultChannel {
 					e.printStackTrace();
 				}
 				
-				String received = new String(packet.getData(), 0, packet.getLength());
-				System.out.println("MC received: " + received);
+				//String received = new String(packet.getData(), 0, packet.getLength());
+				//System.out.println("MC received: " + received);
 				
 				Message msg = new Message(packet);
 				Header msgHeader = msg.getHeader();
@@ -61,6 +64,9 @@ public class ControlChannel extends DefaultChannel {
 							e.printStackTrace();
 						}
 						//Restore.respond(this.getServer().getMDR(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), "fileID", "chunkNum");
+						break;
+					case "REMOVED":
+						this.remove(msg);
 						break;
 					default:
 						break;
@@ -96,6 +102,10 @@ public class ControlChannel extends DefaultChannel {
 				}
 			}
 		}
+		
+		if(this.getServer().getDatabase().containsKey(file.getName())) {
+			this.getServer().getDatabase().remove(file.getName());
+		}
 	}
 
 	public void restore(Message msg) throws InterruptedException {
@@ -116,6 +126,32 @@ public class ControlChannel extends DefaultChannel {
 		}
 		
 		
+	}
+	
+	public void remove(Message msg) {
+		Random r = new Random();
+		int n = r.nextInt(400) + 1;
+		Header header = msg.getHeader();
+		String[] headerArgs = header.getHeaderString().split(" ");
+		HashMap<String, HashMap<Integer, Chunk>> serverDB = this.getServer().getDatabase();
+		
+		if(serverDB.containsKey(headerArgs[3])) {
+			HashMap<Integer, Chunk> fileChunks = serverDB.get(headerArgs[3]);
+			if(fileChunks.containsKey(Integer.parseInt(headerArgs[4]))) {
+				try {
+					Chunk chunk = fileChunks.get(Integer.parseInt(headerArgs[4]));
+					Header headerToSend = new Header("PUTCHUNK", this.getServer().getProtocolVersion(), this.getServer().getServerID(), headerArgs[3], headerArgs[4], Integer.toString(chunk.getReplicationDegree()));
+					Body body = new Body(chunk.getData());
+					Message msgToSend;
+					msgToSend = new Message(headerToSend, body);
+					Thread.sleep(n);
+					this.getServer().getMDB().sendMessage(msgToSend.getMessage());
+				} catch (IOException | InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 }

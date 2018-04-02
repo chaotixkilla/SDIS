@@ -7,6 +7,7 @@ import java.net.DatagramPacket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Random;
 
 import files.Chunk;
@@ -33,7 +34,7 @@ public class BackupChannel extends DefaultChannel {
 				DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 				
 				this.getSocket().receive(packet);
-				//String received = new String(packet.getData(), 0, packet.getLength());
+				//String received = new String(packet.getData(), 0, 128);
 				//System.out.println("MDB received: " + received);
 				
 				Message msg = new Message(packet);
@@ -64,7 +65,9 @@ public class BackupChannel extends DefaultChannel {
 			Header header = msg.getHeader();
 			String[] headerArgs = header.getHeaderString().split(" ");
 			
-			if(headerArgs[2].equals(this.getServer().getServerID())) {
+			System.out.println("header " + header.getHeaderString());
+			
+			if(headerArgs[2].equals(this.getServer().getServerID()) || !this.getServer().canStore(msg.getBody().getBody())) {
 				//return;
 			}
 			else {
@@ -83,10 +86,21 @@ public class BackupChannel extends DefaultChannel {
 				else {
 					System.out.println("Storing chunk number " + headerArgs[4] + " on server " + this.getServer().getServerID());
 					
+					Chunk chunk = new Chunk(headerArgs[3], Integer.parseInt(headerArgs[4]), Integer.parseInt(headerArgs[5]), msg.getBody().getBody());
 					//Files.write(chunkFile.toPath(), msg.getBody().getBody());
 					
 					FileOutputStream fos = new FileOutputStream(chunkFile);
 					fos.write(msg.getBody().getBody());
+					fos.close();
+					
+					//this.getServer().loadDatabase();
+					this.getServer().fileBackingAdd(Integer.parseInt(headerArgs[4]), chunk);
+					this.getServer().putInDB(headerArgs[3], this.getServer().getFileBacking());
+					
+					//System.out.println(this.getServer().getDatabase());
+					
+					this.getServer().addToStorage(msg.getBody().getBody().length);
+					//System.out.println(this.getServer().getCurrentStorage());
 					
 					Thread.sleep(n);
 					Backup.respond(this.getServer().getMC(), this.getServer().getProtocolVersion(), this.getServer().getServerID(), headerArgs[3], headerArgs[4]);

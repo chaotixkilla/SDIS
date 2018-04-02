@@ -60,7 +60,6 @@ public class RestoreChannel extends DefaultChannel {
 		if(!this.getServer().getFileRestoring().containsKey(Integer.parseInt(headerArgs[4]))) {
 			Chunk chunk = new Chunk(headerArgs[3], Integer.parseInt(headerArgs[4]), body.getBody());
 			this.getServer().fileRestoringAdd(Integer.parseInt(headerArgs[4]), chunk);
-			System.out.println(this.getServer().getFileRestoring());
 		}
 		
 		//Check if all chunks are ready
