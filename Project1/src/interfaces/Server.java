@@ -18,7 +18,12 @@ import protocols.Backup;
 import protocols.Delete;
 import protocols.Restore;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.rmi.AlreadyBoundException;
 
 public class Server implements ClientInterface{
@@ -28,6 +33,7 @@ public class Server implements ClientInterface{
 	private ControlChannel MC;
 	private BackupChannel MDB;
 	private RestoreChannel MDR;
+	private int storageSize;
 	
 	private HashMap<Integer, Chunk> fileRestoring;
 	private HashMap<String, HashMap<Integer, Chunk>> database;
@@ -36,6 +42,7 @@ public class Server implements ClientInterface{
 		this.protocolVersion = this.checkValidProtocol(args[0]);
 		this.serverID = this.checkNumber(args[1]);
 		this.accessPoint = args[2];
+		this.storageSize = 10000000; //10MB
 		
 		String mcIP = this.checkValidIP(args[3]);
 		String mcPort = this.checkValidPort(args[4]);
@@ -50,12 +57,17 @@ public class Server implements ClientInterface{
 		this.MDR = new RestoreChannel(mdrIP, mdrPort, this);
 		
 		this.fileRestoring = new HashMap<Integer, Chunk>();
+		this.database = new HashMap<String, HashMap<Integer, Chunk>>();		
 		
 		System.out.println("Creating server (ID = " + this.serverID + ") using protocol " + this.protocolVersion 
 				+ " with the following information:");
 		System.out.println("ControlChannel = " + mcIP + ":" + mcPort);
 		System.out.println("BackupChannel = " + mdbIP + ":" + mdbPort);
 		System.out.println("RestoreChannel = " + mdrIP + ":" + mdrPort);
+		
+		System.out.println("Loading database...");
+		this.loadDatabase();
+		System.out.println("Server database loaded! Current available storage: " + (double)this.storageSize / 1000000 + " MB");
 	}
 	
 	public String checkValidProtocol(String protocol) {
@@ -146,6 +158,46 @@ public class Server implements ClientInterface{
 	
 	public void fileRestoringAdd(int chunkNum, Chunk chunk) {
 		this.fileRestoring.put(chunkNum, chunk);
+	}
+	
+	public void loadDatabase() {
+		String path = "backup/" + this.serverID;
+		File file = new File(path);
+		int currentStorage = 0;
+		HashMap<String, HashMap<Integer, Chunk>> serverDB = new HashMap<String, HashMap<Integer, Chunk>>();
+		
+		if(file.exists() && file.isDirectory()) {
+			String[] storedFiles = file.list();
+			for(String s : storedFiles) {
+				String subpath = path + "/" + s;
+				File storedFileFolder = new File(subpath);
+				if(storedFileFolder.exists() && storedFileFolder.isDirectory()) {
+					HashMap<Integer, Chunk> chunks = new HashMap<Integer, Chunk>();
+					for(File chunk : storedFileFolder.listFiles()) {
+						if(chunk.isFile()) {
+							currentStorage += (int)chunk.length();
+							byte[] buffer = new byte[(int)chunk.length()];
+							try {
+								FileInputStream content = new FileInputStream(chunk);
+								content.read(buffer);
+							} catch (FileNotFoundException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							Chunk chunkAux = new Chunk(storedFileFolder.getName(), Integer.parseInt(chunk.getName()), buffer);
+							chunks.put(Integer.parseInt(chunk.getName()), chunkAux);
+						}
+					}
+					serverDB.put(storedFileFolder.getName(), chunks);
+				}
+			}
+		}
+		
+		this.database = serverDB;
+		this.storageSize -= currentStorage;
 	}
 	
 	@Override
