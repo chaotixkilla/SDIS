@@ -331,4 +331,27 @@ public class Server implements ClientInterface{
 		this.reorganizeDatabase();
 		//Reclaim.spaceReclaim(storageAmount);
 	}
+	
+	@Override
+	public void state() {
+		System.out.println("Retrieving server " + this.serverID + " state...");
+		System.out.println("Currently stored files in this server:");
+		Iterator it = this.database.entrySet().iterator();
+	    while (it.hasNext()) {
+	        Map.Entry pair = (Map.Entry)it.next();
+	        	System.out.println(pair.getKey());
+	        	this.printFileInfo((String) pair.getKey());
+	        it.remove(); // avoids a ConcurrentModificationException
+	    }
+	}
+	
+	public void printFileInfo(String s) {
+		Iterator it = this.database.get(s).entrySet().iterator();
+	    while (it.hasNext()) {
+	        Map.Entry pair = (Map.Entry)it.next();
+	        	System.out.println("\t ChunkNo: " + pair.getKey());
+	        	System.out.println("\t\t Chunk: " + pair.getValue());
+	        it.remove(); // avoids a ConcurrentModificationException
+	    }
+	}
 }

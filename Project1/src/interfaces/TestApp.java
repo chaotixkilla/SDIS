@@ -178,6 +178,8 @@ public class TestApp {
 				case "RECLAIM":
 					client.reclaim(testapp.firstOperand);
 					break;
+				case "STATE":
+					client.state();
 				default:
 					break;
 			}

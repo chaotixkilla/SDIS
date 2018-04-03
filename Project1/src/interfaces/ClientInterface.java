@@ -9,4 +9,5 @@ public interface ClientInterface extends Remote{
     public void restore(String fileName) throws IOException;
     public void delete(String fileName) throws IOException;
     public void reclaim(String storageAmount) throws RemoteException;
+    public void state() throws RemoteException;
 }

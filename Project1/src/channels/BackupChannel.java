@@ -65,7 +65,7 @@ public class BackupChannel extends DefaultChannel {
 			Header header = msg.getHeader();
 			String[] headerArgs = header.getHeaderString().split(" ");
 			
-			System.out.println("header " + header.getHeaderString());
+			//System.out.println("header " + header.getHeaderString());
 			
 			if(headerArgs[2].equals(this.getServer().getServerID()) || !this.getServer().canStore(msg.getBody().getBody())) {
 				//return;
