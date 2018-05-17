@@ -11,7 +11,7 @@ import java.util.Random;
 import java.util.Set;
 
 public class Server {
-	private DatagramSocket socket;
+	private DatagramSocket socket; //SSLSocket in the future
 	private HashMap<Integer, String> connectedUsers;
 	private HashMap<Integer, String> loadedDictionary;
 
