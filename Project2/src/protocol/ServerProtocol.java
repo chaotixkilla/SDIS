@@ -1,5 +1,6 @@
 package protocol;
 
+import logic.User;
 import utils.Utilities;
 
 public class ServerProtocol {
@@ -8,13 +9,13 @@ public class ServerProtocol {
 		
 	}
 
-	public String createSuccessLoginMessage(String username) {
-		String message = "SUCCESS" + Utilities.protocolDivider + username;
+	public String createSuccessLoginMessage(User user) {
+		String message = "SUCCESS" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress();
 		return message;
 	}
 
-	public String createFailedLoginMessage(String username) {
-		String message = "FAILURE" + Utilities.protocolDivider + username;
+	public String createFailedLoginMessage(User user) {
+		String message = "FAILURE" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress();
 		return message;
 	}
 	

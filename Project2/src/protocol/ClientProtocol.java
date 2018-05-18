@@ -9,9 +9,9 @@ public class ClientProtocol {
 		
 	}
 	
-	public String createLoginMessage(String input) {
+	public String createLoginMessage(String input, String address) {
 		String message = new String();
-		message = "LOGIN" + Utilities.protocolDivider + input;
+		message = "LOGIN" + Utilities.protocolDivider + input + Utilities.protocolDivider + address;
 		return message;
 	}
 }

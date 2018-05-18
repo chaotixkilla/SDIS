@@ -12,16 +12,21 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 import protocol.ClientProtocol;
+import utils.ClientUI;
 import utils.Utilities;
 
 public class Client {
 	private InetAddress address;
 	private int port;
+	private SSLSocket socket;
 	private ClientProtocol protocol;
+	
+	private Scanner scanner = new Scanner(System.in);
 	
 	public static void main(String[] args) {
 		Client client = new Client(args[0], args[1]);
 		client.run();
+
 	}
 	
 	protected Client(String hostname, String port) {
@@ -38,54 +43,54 @@ public class Client {
 	protected void run() {
 		try {
 			SSLSocketFactory sslFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-			SSLSocket socket = (SSLSocket) sslFactory.createSocket(this.address, this.port);
-			socket.setEnabledCipherSuites(sslFactory.getDefaultCipherSuites());
+			this.socket = (SSLSocket) sslFactory.createSocket(this.address, this.port);
+			this.socket.setEnabledCipherSuites(sslFactory.getDefaultCipherSuites());
 						
-			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			PrintWriter out = new PrintWriter(this.socket.getOutputStream(), true);
+			BufferedReader in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
 			
 			this.menu(out, in);
 			
 			in.close();
 			out.close();
+
+			scanner.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-
-	public void printUI() {
-		Utilities.clearConsole();
+	
+	public void receiveMessage(PrintWriter out, BufferedReader in) {
+		try {
+			String s = in.readLine();
+			System.out.println("CLIENT RECEIVED: " + s);
+			this.solve(out, in, s);
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
-	public void menu(PrintWriter out, BufferedReader in) throws IOException {
-		Scanner scanner = new Scanner(System.in);
-		System.out.println("Username: ");
-		String username = scanner.nextLine();
-		
-		out.println(this.protocol.createLoginMessage(username));		
-		scanner.close();
-		
-		this.receiveMessage(out, in);
-	}
-	
-	public void receiveMessage(PrintWriter out, BufferedReader in) throws IOException {
-		String s = in.readLine();
-		System.out.println("Message Received: " + s);
-		this.solve(out, s);
-	}
-	
-	public void solve(PrintWriter out, String message) {
+	public void solve(PrintWriter out, BufferedReader in, String message) throws IOException {
 		String[] tokens = message.split(Utilities.protocolDivider);
 		switch(tokens[0]) {
 			case "SUCCESS":
 				System.out.println("LOGGED IN!");
 				break;
 			case "FAILURE":
-				System.out.println("NOT LOGGED IN!");
+				System.out.println("HERE");
+				this.menu(out, in);
 				break;
 			default:
 				break;
 		}
+	}
+	
+	public void menu(PrintWriter out, BufferedReader in) throws IOException {
+		ClientUI.showLoginScreen();
+		String username = scanner.nextLine();
+		out.println(this.protocol.createLoginMessage(username, this.socket.getInetAddress().toString()));
+		System.out.println("CLIENT SENT: " + this.protocol.createLoginMessage(username, this.socket.getInetAddress().toString()));
+		this.receiveMessage(out, in);
 	}
 	
 }

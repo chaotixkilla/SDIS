@@ -6,10 +6,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.SocketException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Random;
@@ -19,12 +21,12 @@ import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 
+import logic.User;
 import protocol.ServerProtocol;
 
 public class Server {
-	//private DatagramSocket socket;
 	private SSLServerSocket socket;
-	private HashMap<Integer, String> connectedUsers;
+	private HashMap<User, Integer> connectedUsers;
 	private HashMap<Integer, String> loadedDictionary;
 	private ServerProtocol protocol;
 
@@ -43,11 +45,10 @@ public class Server {
 			this.socket = (SSLServerSocket) sslFactory.createServerSocket(10500); //random available port
 			this.socket.setNeedClientAuth(true);
 			this.socket.setEnabledCipherSuites(sslFactory.getDefaultCipherSuites());
-			
-			this.connectedUsers = new HashMap<Integer, String>();
+			this.connectedUsers = new HashMap<User, Integer>();
 			this.loadedDictionary = new HashMap<Integer, String>();
 			this.protocol = new ServerProtocol();
-						
+			
 			this.loadDictionary();
 			this.rngArray(5);
 		} catch (SocketException e) {
@@ -63,17 +64,13 @@ public class Server {
 			PrintWriter out = new PrintWriter(receivingSocket.getOutputStream(), true);
 			BufferedReader in = new BufferedReader(new InputStreamReader(receivingSocket.getInputStream()));
 
-			this.menuLogic(out, in);	
+			this.receiveMessage(out, in);
 		}
-	}
-	
-	public void menuLogic(PrintWriter out, BufferedReader in) throws IOException {
-		this.receiveMessage(out, in);
 	}
 	
 	public void receiveMessage(PrintWriter out, BufferedReader in) throws IOException {
 		String s = in.readLine();
-		System.out.println("Message Received: " + s);
+		System.out.println("SERVER RECEIVED: " + s);
 		this.solve(out, s);
 	}
 	
@@ -81,21 +78,25 @@ public class Server {
 		String[] tokens = s.split(":::::");
 		switch(tokens[0]) {
 			case "LOGIN":
-				this.loginUser(out, tokens[1]);
+				this.loginUser(out, tokens[1], tokens[2]);
 				break;
 			default:
 				break;
 		}
 	}
 	
-	public void loginUser(PrintWriter out, String username) {
-		if(!this.connectedUsers.containsKey(username)) {
-			this.connectedUsers.put(this.connectedUsers.size() + 1, username);
+	public void loginUser(PrintWriter out, String username, String address) {
+		User tempUser = new User(username, address);
+		
+		if(!this.connectedUsers.containsKey(tempUser)) {
+			this.connectedUsers.put(tempUser, this.connectedUsers.size() + 1);
 			System.out.println(this.connectedUsers);
-			out.println(this.protocol.createSuccessLoginMessage(username));
+			out.println(this.protocol.createSuccessLoginMessage(tempUser));
+			System.out.println("SERVER SENT: " + this.protocol.createSuccessLoginMessage(tempUser));
 		}
 		else {
-			out.println(this.protocol.createFailedLoginMessage(username));
+			out.println(this.protocol.createFailedLoginMessage(tempUser));
+			System.out.println("SERVER SENT: " + this.protocol.createFailedLoginMessage(tempUser));
 		}
 	}
 	
