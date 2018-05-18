@@ -10,7 +10,9 @@ public class ServerProtocol {
 	}
 
 	public String createSuccessLoginMessage(User user) {
+		System.out.println("username: " + user.getUsername());
 		String message = "SUCCESS" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress();
+		
 		return message;
 	}
 
