@@ -45,6 +45,7 @@ public class ServerThread extends Thread{
 		}
 	}
 	
+	//remote command solver
 	public void solve(PrintWriter out, String s) {
 		String[] tokens = s.split(":::::");
 		switch(tokens[0]) {
@@ -56,14 +57,13 @@ public class ServerThread extends Thread{
 		}
 	}
 	
+	//checks user permissions and tries to log them in
 	public void loginUser(PrintWriter out, String username, String address) {
-		
 		User tempUser = new User(username, address);
 		
-		if(!this.connectedUsers.containsKey(tempUser)) {
+		if(this.checkLoginPermissions(tempUser)) {
 			this.connectedUsers.put(tempUser, this.connectedUsers.size() + 1);
 			System.out.println(this.connectedUsers);
-			System.out.println(tempUser.getUsername() + "    " + tempUser.getAddress());
 			out.println(this.protocol.createSuccessLoginMessage(tempUser));
 			System.out.println("SERVER SENT: " + this.protocol.createSuccessLoginMessage(tempUser));
 		}
@@ -71,5 +71,19 @@ public class ServerThread extends Thread{
 			out.println(this.protocol.createFailedLoginMessage(tempUser));
 			System.out.println("SERVER SENT: " + this.protocol.createFailedLoginMessage(tempUser));
 		}
+	}
+	
+	/*
+	 * USER PERMISSIONS
+	 */
+	public boolean checkLoginPermissions(User user) {
+		if(!this.connectedUsers.containsKey(user)) {
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean checkMainMenuPermissions(User user) {
+		return this.connectedUsers.containsKey(user);
 	}
 }

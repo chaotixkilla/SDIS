@@ -10,14 +10,12 @@ public class ServerProtocol {
 	}
 
 	public String createSuccessLoginMessage(User user) {
-		System.out.println("username: " + user.getUsername());
-		String message = "SUCCESS" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress();
-		
+		String message = "LOGINSUCCESS" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress();
 		return message;
 	}
 
 	public String createFailedLoginMessage(User user) {
-		String message = "FAILURE" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress();
+		String message = "LOGINFAILURE" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress();
 		return message;
 	}
 	
