@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLSocket;
 
@@ -50,7 +52,7 @@ public class ServerThread extends Thread{
 		String[] tokens = s.split(":::::");
 		switch(tokens[0]) {
 			case "LOGIN":
-				this.loginUser(out, tokens[1], tokens[2]);
+				this.loginUser(out, s);
 				break;
 			default:
 				break;
@@ -58,10 +60,17 @@ public class ServerThread extends Thread{
 	}
 	
 	//checks user permissions and tries to log them in
-	public void loginUser(PrintWriter out, String username, String address) {
-		User tempUser = new User(username, address);
+	public void loginUser(PrintWriter out, String input) {
+		//sanitize input
+		//Pattern p = Pattern.compile("^([a-zA-Z0-9_-])*$");
+		Pattern p = Pattern.compile("^([a-zA-Z0-9_-])*$");
+		Matcher m = p.matcher(input);
+		boolean flag = m.matches();
+				
+		String[] tokens = input.split(":::::");
+		User tempUser = new User(tokens[1], tokens[2]); //[0] - command, [1] - username, [2] - user address
 		
-		if(this.checkLoginPermissions(tempUser)) {
+		if(this.checkLoginPermissions(tempUser) && flag) {
 			this.connectedUsers.put(tempUser, this.connectedUsers.size() + 1);
 			System.out.println(this.connectedUsers);
 			out.println(this.protocol.createSuccessLoginMessage(tempUser));
