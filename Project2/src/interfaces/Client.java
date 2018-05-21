@@ -7,6 +7,8 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -89,11 +91,27 @@ public class Client {
 	}
 	
 	public void loginMenu(PrintWriter out, BufferedReader in) throws IOException {
+		boolean flag = false;
+		String username = new String();
 		ClientUI.showLoginScreen();
-		String username = scanner.nextLine();
+		
+		while(!flag) {
+			username = scanner.nextLine();
+			
+			//sanitize input
+			Pattern p = Pattern.compile("^([a-zA-Z0-9_-])*$");
+			Matcher m = p.matcher(username);
+			flag = m.matches();
+			
+			if(!flag) {
+				System.out.println("Invalid username, try again!");
+			}
+		}
+		
 		out.println(this.protocol.createLoginMessage(username, this.socket.getInetAddress().toString()));
 		System.out.println("CLIENT SENT: " + this.protocol.createLoginMessage(username, this.socket.getInetAddress().toString()));
 		this.receiveMessage(out, in);
+		
 	}
 	
 	public void mainMenu(PrintWriter out, BufferedReader in) throws IOException{

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.SocketException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Random;
 import java.util.Set;
@@ -14,11 +15,13 @@ import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 
+import logic.Lobby;
 import logic.User;
 
 public class Server {
 	private SSLServerSocket socket;
-	private HashMap<User, Integer> connectedUsers;
+	private HashSet<User> connectedUsers;
+	private HashSet<Lobby> gameLobbies;
 	private HashMap<Integer, String> loadedDictionary;
 
 	public static void main(String[] args) {
@@ -36,7 +39,8 @@ public class Server {
 			this.socket = (SSLServerSocket) sslFactory.createServerSocket(10500); //random available port
 			this.socket.setNeedClientAuth(true);
 			this.socket.setEnabledCipherSuites(sslFactory.getDefaultCipherSuites());
-			this.connectedUsers = new HashMap<User, Integer>();
+			this.connectedUsers = new HashSet<User>();
+			this.gameLobbies = new HashSet<Lobby>();
 			this.loadedDictionary = new HashMap<Integer, String>();
 		} catch (SocketException e) {
 			e.printStackTrace();
@@ -48,7 +52,7 @@ public class Server {
 	protected void run() throws IOException {
 		while(true) {
 			SSLSocket receivingSocket = (SSLSocket) this.socket.accept();	
-			new ServerThread(receivingSocket, this.connectedUsers).start();
+			new ServerThread(receivingSocket, this.connectedUsers, this.gameLobbies).start();
 		}
 	}
 	

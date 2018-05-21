@@ -4,23 +4,24 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.HashSet;
 
 import javax.net.ssl.SSLSocket;
 
+import logic.Lobby;
 import logic.User;
 import protocol.ServerProtocol;
 
 public class ServerThread extends Thread{
 	private SSLSocket socket;
 	private ServerProtocol protocol;
-	private HashMap<User, Integer> connectedUsers;
+	private HashSet<User> connectedUsers;
+	private HashSet<Lobby> gameLobbies;
 	
-	public ServerThread(SSLSocket socket, HashMap<User, Integer> connectedUsers) {
+	public ServerThread(SSLSocket socket, HashSet<User> connectedUsers, HashSet<Lobby> gameLobbies) {
 		this.socket = socket;
 		this.connectedUsers = connectedUsers;
+		this.gameLobbies = gameLobbies;
 		this.protocol = new ServerProtocol();
 	}
 	
@@ -52,7 +53,7 @@ public class ServerThread extends Thread{
 		String[] tokens = s.split(":::::");
 		switch(tokens[0]) {
 			case "LOGIN":
-				this.loginUser(out, s);
+				this.loginUser(out, tokens[1], tokens[2]);
 				break;
 			default:
 				break;
@@ -60,18 +61,11 @@ public class ServerThread extends Thread{
 	}
 	
 	//checks user permissions and tries to log them in
-	public void loginUser(PrintWriter out, String input) {
-		//sanitize input
-		//Pattern p = Pattern.compile("^([a-zA-Z0-9_-])*$");
-		Pattern p = Pattern.compile("^([a-zA-Z0-9_-])*$");
-		Matcher m = p.matcher(input);
-		boolean flag = m.matches();
-				
-		String[] tokens = input.split(":::::");
-		User tempUser = new User(tokens[1], tokens[2]); //[0] - command, [1] - username, [2] - user address
+	public void loginUser(PrintWriter out, String username, String address) {
+		User tempUser = new User(username, address); //[0] - command, [1] - username, [2] - user address
 		
-		if(this.checkLoginPermissions(tempUser) && flag) {
-			this.connectedUsers.put(tempUser, this.connectedUsers.size() + 1);
+		if(this.checkLoginPermissions(tempUser)) {
+			this.connectedUsers.add(tempUser);
 			System.out.println(this.connectedUsers);
 			out.println(this.protocol.createSuccessLoginMessage(tempUser));
 			System.out.println("SERVER SENT: " + this.protocol.createSuccessLoginMessage(tempUser));
@@ -86,13 +80,13 @@ public class ServerThread extends Thread{
 	 * USER PERMISSIONS
 	 */
 	public boolean checkLoginPermissions(User user) {
-		if(!this.connectedUsers.containsKey(user)) {
+		if(!this.connectedUsers.contains(user)) {
 			return true;
 		}
 		return false;
 	}
 	
 	public boolean checkMainMenuPermissions(User user) {
-		return this.connectedUsers.containsKey(user);
+		return this.connectedUsers.contains(user);
 	}
 }
