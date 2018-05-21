@@ -85,11 +85,14 @@ public class Client {
 			case "LOGINFAILURE":
 				this.loginMenu(out, in);
 				break;
+			case "LOGOUTSUCCESS":
+				this.closeClient();
+				break;
 			default:
 				break;
 		}
 	}
-	
+
 	public void loginMenu(PrintWriter out, BufferedReader in) throws IOException {
 		boolean flag = false;
 		String username = new String();
@@ -120,7 +123,7 @@ public class Client {
 		while(scanner.hasNext()) {
 			if(scanner.hasNextInt()) {
 				option = scanner.nextInt();
-				if(option > 0 && option < 4) {
+				if(option > 0 && option < 5) {
 					break;
 				}
 			}
@@ -145,6 +148,16 @@ public class Client {
 			default:
 				break;
 		}
+	}
+	
+	private void closeClient() {
+		try {
+			System.out.println("The application will now exit...");
+			this.socket.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 }

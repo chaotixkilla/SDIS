@@ -19,5 +19,19 @@ public class ServerProtocol {
 		return message;
 	}
 	
+	public String createSuccessLogoutMessage(User user) {
+		String message = "LOGOUTSUCCESS" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress();
+		return message;
+	}
+
+	public String createSuccessGameCreationMessage(User user, String lobbyName) {
+		String message = "SUCCESSCREATEGAME" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress() + Utilities.protocolDivider + lobbyName;
+		return message;
+	}
+	
+	public String createFailedGameCreationMessage(User user, String lobbyName) {
+		String message = "FAILEDCREATEGAME" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress() + Utilities.protocolDivider + lobbyName;
+		return message;
+	}
 	
 }

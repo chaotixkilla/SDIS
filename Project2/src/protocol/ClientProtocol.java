@@ -29,6 +29,7 @@ public class ClientProtocol {
 	}
 
 	public String createLogoutMessage(User user) {
-		return null;
+		String message = "LOGOUT" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress();
+		return message;
 	}
 }
