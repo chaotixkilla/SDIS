@@ -11,14 +11,13 @@ public class ClientProtocol {
 	}
 	
 	public String createLoginMessage(String input, String address) {
-		String message = new String();
-		message = "LOGIN" + Utilities.protocolDivider + input + Utilities.protocolDivider + address;
+		String message = "LOGIN" + Utilities.protocolDivider + input + Utilities.protocolDivider + address;
 		return message;
 	}
 
 	public String createNewGameMessage(User user) {
 		String message = "CREATEGAME" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress();
-		return null;
+		return message;
 	}
 
 	public String createViewLobbiesMessage(User user) {

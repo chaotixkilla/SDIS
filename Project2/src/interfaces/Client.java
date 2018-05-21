@@ -102,7 +102,7 @@ public class Client {
 		while(scanner.hasNext()) {
 			if(scanner.hasNextInt()) {
 				option = scanner.nextInt();
-				if(option > 1 && option < 4) {
+				if(option > 0 && option < 4) {
 					break;
 				}
 			}
