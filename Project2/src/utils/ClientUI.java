@@ -37,4 +37,20 @@ public class ClientUI {
 		System.out.println("Insert an option (between 1 and 4): ");
 	}
 
+	public static void showGameCreationScreen() {
+		Utilities.clearConsole();
+		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
+		System.out.println("||                                               ||");
+		System.out.println("||                                               ||");
+		System.out.println("||                                               ||");
+		System.out.println("||                                               ||");
+		System.out.println("||              Setup your lobby by              ||");
+		System.out.println("||           following the instructions          ||");
+		System.out.println("||                    below                      ||");
+		System.out.println("||                                               ||");
+		System.out.println("||                                               ||");
+		System.out.println("||                                               ||");
+		System.out.println("||                                               ||");
+		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
+	}
 }

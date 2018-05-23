@@ -88,53 +88,46 @@ public class Client {
 			case "LOGOUTSUCCESS":
 				this.closeClient();
 				break;
+			case "SUCCESSCREATEGAME":
+				while(true) {
+					
+				}
+				//break;
 			default:
 				break;
 		}
 	}
 
 	public void loginMenu(PrintWriter out, BufferedReader in) throws IOException {
-		boolean flag = false;
-		String username = new String();
 		ClientUI.showLoginScreen();
-		
-		while(!flag) {
-			username = scanner.nextLine();
-			
-			//sanitize input
-			Pattern p = Pattern.compile("^([a-zA-Z0-9_-])*$");
-			Matcher m = p.matcher(username);
-			flag = m.matches();
-			
-			if(!flag) {
-				System.out.println("Invalid username, try again!");
-			}
-		}
+		String username = this.getUserInput();
 		
 		out.println(this.protocol.createLoginMessage(username, this.socket.getInetAddress().toString()));
-		System.out.println("CLIENT SENT: " + this.protocol.createLoginMessage(username, this.socket.getInetAddress().toString()));
 		this.receiveMessage(out, in);
 		
 	}
 	
+	private void createGameMenu(PrintWriter out, BufferedReader in) {
+		boolean flag = false;
+		ClientUI.showGameCreationScreen();
+
+		System.out.println("Lobby Name: ");
+		String lobbyName = this.getUserInput();
+		System.out.println("Maximum Players (between 3 and 10): ");
+		int maxPlayers = this.getUserOption(3, 10);
+		
+		out.println(this.protocol.createNewGameMessage(this.currentUser, lobbyName, maxPlayers));
+		this.receiveMessage(out, in);
+	}
+	
 	public void mainMenu(PrintWriter out, BufferedReader in) throws IOException{
-		int option = -1;
 		ClientUI.showMainMenuScreen();
-		while(scanner.hasNext()) {
-			if(scanner.hasNextInt()) {
-				option = scanner.nextInt();
-				if(option > 0 && option < 5) {
-					break;
-				}
-			}
-			else {
-				scanner.next();
-			}
-		}
+		
+		int option = this.getUserOption(1, 4);
 		
 		switch(option) {
 			case 1:
-				out.println(this.protocol.createNewGameMessage(this.currentUser));
+				this.createGameMenu(out, in);
 				break;
 			case 2:
 				out.println(this.protocol.createViewLobbiesMessage(this.currentUser));
@@ -150,6 +143,43 @@ public class Client {
 		}
 	}
 	
+	public String getUserInput() {
+		boolean flag = false;
+		String input = new String();
+		
+		while(!flag) {
+			input = scanner.nextLine();
+			
+			//sanitize input
+			Pattern p = Pattern.compile("^([a-zA-Z0-9_-])*$");
+			Matcher m = p.matcher(input);
+			flag = m.matches();
+			
+			if(!flag) {
+				System.out.println("Invalid input, try again!");
+			}
+		}
+		return input;
+	}
+	
+	public int getUserOption(int min, int max) {
+		int option = -1;
+		
+		while(scanner.hasNext()) {
+			if(scanner.hasNextInt()) {
+				option = scanner.nextInt();
+				scanner.nextLine(); //clear buffer
+				if(option >= min && option <= max) {
+					break;
+				}
+			}
+			else {
+				scanner.next();
+			}
+		}
+		return option;
+	}
+
 	private void closeClient() {
 		try {
 			System.out.println("The application will now exit...");

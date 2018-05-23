@@ -6,11 +6,15 @@ public class Lobby {
 	private User host;
 	private String name;
 	private HashSet<User> users;
+	private int currentPlayers;
+	private int maxPlayers;
 	
-	public Lobby(User host, String name) {
+	public Lobby(User host, String name, int maxPlayers) {
 		this.host = host;
 		this.name = name;
 		this.users = new HashSet<User>();
+		this.currentPlayers = 1;
+		this.maxPlayers = maxPlayers;
 	}
 	
 	public User getHost() {
@@ -31,15 +35,12 @@ public class Lobby {
 	
 	public int hashcode() {
 		String s = new String();
-		for(User user : this.users) {
-			s += user.getUsername();
-		}
-		s += this.host.getUsername();
+		s += this.host.getUsername() + this.name;
 		return s.hashCode();
 	}
 	
 	public boolean equals(Object lobby) {
-		return ((Lobby) lobby).getHost().equals(this.host) && ((Lobby) lobby).getUsers().equals(this.users) && ((Lobby) lobby).getName().equals(this.getName());
+		return ((Lobby) lobby).getHost().equals(this.host) && ((Lobby) lobby).getName().equals(this.getName());
 	}
 	
 	

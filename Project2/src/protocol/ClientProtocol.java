@@ -12,11 +12,14 @@ public class ClientProtocol {
 	
 	public String createLoginMessage(String input, String address) {
 		String message = "LOGIN" + Utilities.protocolDivider + input + Utilities.protocolDivider + address;
+		System.out.println("CLIENT SENT: " + message);
 		return message;
 	}
 
-	public String createNewGameMessage(User user) {
-		String message = "CREATEGAME" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress();
+	public String createNewGameMessage(User user, String lobbyName, int maxPlayers) {
+		String message = "CREATEGAME" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + 
+				user.getAddress() + Utilities.protocolDivider + lobbyName + Utilities.protocolDivider + maxPlayers;
+		System.out.println("CLIENT SENT: " + message);
 		return message;
 	}
 
@@ -30,6 +33,7 @@ public class ClientProtocol {
 
 	public String createLogoutMessage(User user) {
 		String message = "LOGOUT" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress();
+		System.out.println("CLIENT SENT: " + message);
 		return message;
 	}
 }

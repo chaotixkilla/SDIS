@@ -59,23 +59,24 @@ public class ServerThread extends Thread{
 				this.logoutUser(out, tokens[1], tokens[2]);
 				break;
 			case "CREATEGAME":
-				this.createGame(out, tokens[1], tokens[2], tokens[3]);
+				this.createGame(out, tokens[1], tokens[2], tokens[3], tokens[4]);
 				break;
 			default:
 				break;
 		}
 	}
 	
-	public void createGame(PrintWriter out, String username, String address, String lobbyName) {
+	public void createGame(PrintWriter out, String username, String address, String lobbyName, String maxPlayers) {
 		User tempUser = new User(username, address);
-		Lobby tempLobby = new Lobby(tempUser, lobbyName);
+		Lobby tempLobby = new Lobby(tempUser, lobbyName, Integer.parseInt(maxPlayers));
 		
 		if(this.checkMainMenuPermissions(tempUser) && this.canCreateLobby(tempUser)) {
 			this.gameLobbies.add(tempLobby);
-			out.println(this.protocol.createSuccessGameCreationMessage(tempUser, lobbyName));
+			System.out.println(this.gameLobbies);
+			out.println(this.protocol.createSuccessGameCreationMessage(tempUser, lobbyName, Integer.parseInt(maxPlayers)));
 		}
 		else {
-			out.println(this.protocol.createFailedGameCreationMessage(tempUser, lobbyName));
+			out.println(this.protocol.createFailedGameCreationMessage(tempUser, lobbyName, Integer.parseInt(maxPlayers)));
 		}
 	}
 
@@ -87,11 +88,9 @@ public class ServerThread extends Thread{
 			this.connectedUsers.add(tempUser);
 			System.out.println(this.connectedUsers);
 			out.println(this.protocol.createSuccessLoginMessage(tempUser));
-			System.out.println("SERVER SENT: " + this.protocol.createSuccessLoginMessage(tempUser));
 		}
 		else {
 			out.println(this.protocol.createFailedLoginMessage(tempUser));
-			System.out.println("SERVER SENT: " + this.protocol.createFailedLoginMessage(tempUser));
 		}
 	}
 	
@@ -103,7 +102,6 @@ public class ServerThread extends Thread{
 				this.connectedUsers.remove(tempUser);
 				System.out.println(this.connectedUsers);
 				out.println(this.protocol.createSuccessLogoutMessage(tempUser));
-				System.out.println("SERVER SENT: " + this.protocol.createSuccessLogoutMessage(tempUser));
 				out.close();
 				this.socket.close();
 			}
