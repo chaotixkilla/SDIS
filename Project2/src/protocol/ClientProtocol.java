@@ -24,7 +24,10 @@ public class ClientProtocol {
 	}
 
 	public String createViewLobbiesMessage(User user) {
-		return null;
+		String message = "VIEWLOBBIES" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider +
+				user.getAddress();
+		System.out.println("CLIENT SENT: " + message);
+		return message;
 	}
 
 	public String createViewRulesMessage(User user) {

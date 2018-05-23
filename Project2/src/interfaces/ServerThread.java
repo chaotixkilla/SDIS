@@ -11,6 +11,7 @@ import javax.net.ssl.SSLSocket;
 import logic.Lobby;
 import logic.User;
 import protocol.ServerProtocol;
+import utils.Utilities;
 
 public class ServerThread extends Thread{
 	private SSLSocket socket;
@@ -50,7 +51,7 @@ public class ServerThread extends Thread{
 	
 	//remote command solver
 	public void solve(PrintWriter out, String s) {
-		String[] tokens = s.split(":::::");
+		String[] tokens = s.split(Utilities.protocolDivider);
 		switch(tokens[0]) {
 			case "LOGIN":
 				this.loginUser(out, tokens[1], tokens[2]);
@@ -61,25 +62,14 @@ public class ServerThread extends Thread{
 			case "CREATEGAME":
 				this.createGame(out, tokens[1], tokens[2], tokens[3], tokens[4]);
 				break;
+			case "VIEWLOBBIES":
+				this.sendLobbyInfo(out, tokens[1], tokens[2]);
+				break;
 			default:
 				break;
 		}
 	}
 	
-	public void createGame(PrintWriter out, String username, String address, String lobbyName, String maxPlayers) {
-		User tempUser = new User(username, address);
-		Lobby tempLobby = new Lobby(tempUser, lobbyName, Integer.parseInt(maxPlayers));
-		
-		if(this.checkMainMenuPermissions(tempUser) && this.canCreateLobby(tempUser)) {
-			this.gameLobbies.add(tempLobby);
-			System.out.println(this.gameLobbies);
-			out.println(this.protocol.createSuccessGameCreationMessage(tempUser, lobbyName, Integer.parseInt(maxPlayers)));
-		}
-		else {
-			out.println(this.protocol.createFailedGameCreationMessage(tempUser, lobbyName, Integer.parseInt(maxPlayers)));
-		}
-	}
-
 	//checks user permissions and tries to log them in
 	public void loginUser(PrintWriter out, String username, String address) {
 		User tempUser = new User(username, address); //[0] - command, [1] - username, [2] - user address
@@ -113,6 +103,31 @@ public class ServerThread extends Thread{
 		}
 	}
 	
+	public void createGame(PrintWriter out, String username, String address, String lobbyName, String maxPlayers) {
+		User tempUser = new User(username, address);
+		Lobby tempLobby = new Lobby(tempUser, lobbyName, Integer.parseInt(maxPlayers));
+		
+		if(this.checkMainMenuPermissions(tempUser) && this.canCreateLobby(tempUser)) {
+			this.gameLobbies.add(tempLobby);
+			System.out.println(this.gameLobbies);
+			out.println(this.protocol.createSuccessGameCreationMessage(tempUser, lobbyName, Integer.parseInt(maxPlayers)));
+		}
+		else {
+			out.println(this.protocol.createFailedGameCreationMessage(tempUser, lobbyName, Integer.parseInt(maxPlayers)));
+		}
+	}
+	
+	public void sendLobbyInfo(PrintWriter out, String username, String address) {
+		User tempUser = new User(username, address);
+		
+		if(this.checkMainMenuPermissions(tempUser)) {
+			out.println(this.protocol.createSuccessViewLobbiesMessage(tempUser, this.gameLobbies));
+		}
+		else {
+			out.println(this.protocol.createFailedViewLobbiesMessage(tempUser, this.gameLobbies));
+		}
+	}
+	
 	/*
 	 * USER PERMISSIONS
 	 */
@@ -124,17 +139,29 @@ public class ServerThread extends Thread{
 	}
 	
 	public boolean checkMainMenuPermissions(User user) {
-		return this.connectedUsers.contains(user);
+		boolean flag = true;
+		for(Lobby l : this.gameLobbies) {
+			if(l.isInLobby(user)) {
+				flag = false;
+			}
+		}
+		return this.connectedUsers.contains(user) && flag;
 	}
 	
 	public boolean checkLogoutPermissions(User user) {
-		return this.connectedUsers.contains(user);
+		boolean flag = true;
+		for(Lobby l : this.gameLobbies) {
+			if(l.isInLobby(user)) {
+				flag = false;
+			}
+		}
+		return this.connectedUsers.contains(user) && flag;
 	}
 	
 	public boolean canCreateLobby(User user) {
 		boolean flag = true;
 		for(Lobby lobby : this.gameLobbies) {
-			if(user == lobby.getHost() || lobby.getUsers().contains(user)) {
+			if(lobby.isInLobby(user)) {
 				flag = false;
 			}
 		}		

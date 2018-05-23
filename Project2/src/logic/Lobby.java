@@ -29,6 +29,26 @@ public class Lobby {
 		return this.users;
 	}
 	
+	public int getCurrentPlayers() {
+		return this.currentPlayers;
+	}
+	
+	public int getMaxPlayers() {
+		return this.maxPlayers;
+	}
+	
+	public boolean isInLobby(User user) {
+		if(this.host.equals(user) || this.users.contains(user)) {
+			return true;
+		}
+		return false;
+	}
+	
+	public String getLobbyInfo() {
+		String info = this.name + "/////" + this.host.getUsername() + "/////" + this.currentPlayers + "/////" + this.maxPlayers + "/////";
+		return info;
+	}
+	
 	public void addUser(User user) {
 		this.users.add(user);
 	}

@@ -89,10 +89,11 @@ public class Client {
 				this.closeClient();
 				break;
 			case "SUCCESSCREATEGAME":
-				while(true) {
-					
-				}
-				//break;
+				System.out.println("CRIEI JOGO");
+				break;
+			case "SUCCESSVIEWLOBBIES":
+				this.viewLobbies(out, in, tokens[3]);
+				break;
 			default:
 				break;
 		}
@@ -107,8 +108,7 @@ public class Client {
 		
 	}
 	
-	private void createGameMenu(PrintWriter out, BufferedReader in) {
-		boolean flag = false;
+	public void createGameMenu(PrintWriter out, BufferedReader in) {
 		ClientUI.showGameCreationScreen();
 
 		System.out.println("Lobby Name: ");
@@ -141,6 +141,13 @@ public class Client {
 			default:
 				break;
 		}
+		
+		this.receiveMessage(out, in);
+	}
+	
+	public void viewLobbies(PrintWriter out, BufferedReader in, String message) {
+		String[] lobbyInfo = message.split("/////"); //[0] ate [3] e um lobby, [4] a [7] outro, etc...
+		ClientUI.showLobbiesScreen(lobbyInfo);
 	}
 	
 	public String getUserInput() {
@@ -180,7 +187,7 @@ public class Client {
 		return option;
 	}
 
-	private void closeClient() {
+	public void closeClient() {
 		try {
 			System.out.println("The application will now exit...");
 			this.socket.close();

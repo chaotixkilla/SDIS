@@ -53,4 +53,19 @@ public class ClientUI {
 		System.out.println("||                                               ||");
 		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
 	}
+	
+	public static void showLobbiesScreen(String[] lobbies) {
+		Utilities.clearConsole();
+		int index = 1;
+		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
+		System.out.println("|| ID |   LOBBY NAME   |   OWNER   |   PLAYERS   ||");
+		System.out.println("||-----------------------------------------------||");
+		
+		for(int i = 0; i < lobbies.length; i += 4) {
+			System.out.println(String.format("|| %2s | %14s | %9s |    %2s/%2s    ||", index, lobbies[i], lobbies[i+1], lobbies[i+2], lobbies[i+3]));
+			index++;
+		}
+		
+		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
+	}
 }
