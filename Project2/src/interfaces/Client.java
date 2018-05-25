@@ -26,6 +26,8 @@ public class Client {
 	private User currentUser;
 	
 	private Scanner scanner = new Scanner(System.in);
+	private PrintWriter out;
+	private BufferedReader in;
 	
 	public static void main(String[] args) {
 		Client client = new Client(args[0], args[1]);
@@ -50,40 +52,40 @@ public class Client {
 			this.socket = (SSLSocket) sslFactory.createSocket(this.address, this.port);
 			this.socket.setEnabledCipherSuites(sslFactory.getDefaultCipherSuites());
 						
-			PrintWriter out = new PrintWriter(this.socket.getOutputStream(), true);
-			BufferedReader in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+			this.out = new PrintWriter(this.socket.getOutputStream(), true);
+			this.in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
 			
-			this.loginMenu(out, in);
+			this.loginMenu();
 			
-			in.close();
-			out.close();
+			this.in.close();
+			this.out.close();
 
-			scanner.close();
+			this.scanner.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public void receiveMessage(PrintWriter out, BufferedReader in) {
+	public void receiveMessage() {
 		try {
-			String s = in.readLine();
+			String s = this.in.readLine();
 			System.out.println("CLIENT RECEIVED: " + s);
-			this.solve(out, in, s);
+			this.solve(s);
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public void solve(PrintWriter out, BufferedReader in, String message) throws IOException {
+	public void solve(String message) throws IOException {
 		String[] tokens = message.split(Utilities.protocolDivider);
 		switch(tokens[0]) {
 			case "LOGINSUCCESS":
 				this.currentUser = new User(tokens[1], tokens[2]); //TODO: not sure if this is the most appropriate way
 				System.out.println("CREATED USER: " + tokens[1] + "     " + tokens[2]);
-				this.mainMenu(out, in);
+				this.mainMenu();
 				break;
 			case "LOGINFAILURE":
-				this.loginMenu(out, in);
+				this.loginMenu();
 				break;
 			case "LOGOUTSUCCESS":
 				this.closeClient();
@@ -92,23 +94,23 @@ public class Client {
 				System.out.println("CRIEI JOGO");
 				break;
 			case "SUCCESSVIEWLOBBIES":
-				this.viewLobbies(out, in, tokens[3]);
+				this.viewLobbies(tokens[3]);
 				break;
 			default:
 				break;
 		}
 	}
 
-	public void loginMenu(PrintWriter out, BufferedReader in) throws IOException {
+	public void loginMenu() throws IOException {
 		ClientUI.showLoginScreen();
 		String username = this.getUserInput();
 		
-		out.println(this.protocol.createLoginMessage(username, this.socket.getInetAddress().toString()));
-		this.receiveMessage(out, in);
+		this.out.println(this.protocol.createLoginMessage(username, this.socket.getInetAddress().toString()));
+		this.receiveMessage();
 		
 	}
 	
-	public void createGameMenu(PrintWriter out, BufferedReader in) {
+	public void createGameMenu() {
 		ClientUI.showGameCreationScreen();
 
 		System.out.println("Lobby Name: ");
@@ -116,36 +118,36 @@ public class Client {
 		System.out.println("Maximum Players (between 3 and 10): ");
 		int maxPlayers = this.getUserOption(3, 10);
 		
-		out.println(this.protocol.createNewGameMessage(this.currentUser, lobbyName, maxPlayers));
-		this.receiveMessage(out, in);
+		this.out.println(this.protocol.createNewGameMessage(this.currentUser, lobbyName, maxPlayers));
+		this.receiveMessage();
 	}
 	
-	public void mainMenu(PrintWriter out, BufferedReader in) throws IOException{
+	public void mainMenu() throws IOException{
 		ClientUI.showMainMenuScreen();
 		
 		int option = this.getUserOption(1, 4);
 		
 		switch(option) {
 			case 1:
-				this.createGameMenu(out, in);
+				this.createGameMenu();
 				break;
 			case 2:
-				out.println(this.protocol.createViewLobbiesMessage(this.currentUser));
+				this.out.println(this.protocol.createViewLobbiesMessage(this.currentUser));
 				break;
 			case 3:
-				out.println(this.protocol.createViewRulesMessage(this.currentUser));
+				this.out.println(this.protocol.createViewRulesMessage(this.currentUser));
 				break;
 			case 4:
-				out.println(this.protocol.createLogoutMessage(this.currentUser));
+				this.out.println(this.protocol.createLogoutMessage(this.currentUser));
 				break;
 			default:
 				break;
 		}
 		
-		this.receiveMessage(out, in);
+		this.receiveMessage();
 	}
 	
-	public void viewLobbies(PrintWriter out, BufferedReader in, String message) {
+	public void viewLobbies(String message) {
 		String[] lobbyInfo = message.split("/////"); //[0] ate [3] e um lobby, [4] a [7] outro, etc...
 		ClientUI.showLobbiesScreen(lobbyInfo);
 	}
@@ -155,7 +157,7 @@ public class Client {
 		String input = new String();
 		
 		while(!flag) {
-			input = scanner.nextLine();
+			input = this.scanner.nextLine();
 			
 			//sanitize input
 			Pattern p = Pattern.compile("^([a-zA-Z0-9_-])*$");
@@ -172,16 +174,16 @@ public class Client {
 	public int getUserOption(int min, int max) {
 		int option = -1;
 		
-		while(scanner.hasNext()) {
-			if(scanner.hasNextInt()) {
-				option = scanner.nextInt();
-				scanner.nextLine(); //clear buffer
+		while(this.scanner.hasNext()) {
+			if(this.scanner.hasNextInt()) {
+				option = this.scanner.nextInt();
+				this.scanner.nextLine(); //clear buffer
 				if(option >= min && option <= max) {
 					break;
 				}
 			}
 			else {
-				scanner.next();
+				this.scanner.next();
 			}
 		}
 		return option;
@@ -190,6 +192,9 @@ public class Client {
 	public void closeClient() {
 		try {
 			System.out.println("The application will now exit...");
+			this.scanner.close();
+			this.in.close();
+			this.out.close();
 			this.socket.close();
 		} catch (IOException e) {
 			e.printStackTrace();

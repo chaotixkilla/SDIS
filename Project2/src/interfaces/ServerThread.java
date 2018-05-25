@@ -19,51 +19,56 @@ public class ServerThread extends Thread{
 	private HashSet<User> connectedUsers;
 	private HashSet<Lobby> gameLobbies;
 	
-	public ServerThread(SSLSocket socket, HashSet<User> connectedUsers, HashSet<Lobby> gameLobbies) {
-		this.socket = socket;
-		this.connectedUsers = connectedUsers;
-		this.gameLobbies = gameLobbies;
-		this.protocol = new ServerProtocol();
-	}
+	private PrintWriter out;
+	private BufferedReader in;
 	
-	@Override
-	public void run() {
+	public ServerThread(SSLSocket socket, HashSet<User> connectedUsers, HashSet<Lobby> gameLobbies) {
 		try {
-			PrintWriter out = new PrintWriter(this.socket.getOutputStream(), true);
-			BufferedReader in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-			
-			while(true) {
-				this.receiveMessage(out, in);
-			}
-			
+			this.socket = socket;
+			this.connectedUsers = connectedUsers;
+			this.gameLobbies = gameLobbies;
+			this.protocol = new ServerProtocol();
+			this.out = new PrintWriter(this.socket.getOutputStream(), true);
+			this.in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));		
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public void receiveMessage(PrintWriter out, BufferedReader in) throws IOException {
-		String s = in.readLine();
+	@Override
+	public void run() {
+		try {
+			while(true) {
+				this.receiveMessage();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void receiveMessage() throws IOException {
+		String s = this.in.readLine();
 		if(s != null) {
 			System.out.println("SERVER RECEIVED: " + s);
-			this.solve(out, s);
+			this.solve(s);
 		}
 	}
 	
 	//remote command solver
-	public void solve(PrintWriter out, String s) {
+	public void solve(String s) {
 		String[] tokens = s.split(Utilities.protocolDivider);
 		switch(tokens[0]) {
 			case "LOGIN":
-				this.loginUser(out, tokens[1], tokens[2]);
+				this.loginUser(tokens[1], tokens[2]);
 				break;
 			case "LOGOUT":
-				this.logoutUser(out, tokens[1], tokens[2]);
+				this.logoutUser(tokens[1], tokens[2]);
 				break;
 			case "CREATEGAME":
-				this.createGame(out, tokens[1], tokens[2], tokens[3], tokens[4]);
+				this.createGame(tokens[1], tokens[2], tokens[3], tokens[4]);
 				break;
 			case "VIEWLOBBIES":
-				this.sendLobbyInfo(out, tokens[1], tokens[2]);
+				this.sendLobbyInfo(tokens[1], tokens[2]);
 				break;
 			default:
 				break;
@@ -71,28 +76,29 @@ public class ServerThread extends Thread{
 	}
 	
 	//checks user permissions and tries to log them in
-	public void loginUser(PrintWriter out, String username, String address) {
+	public void loginUser(String username, String address) {
 		User tempUser = new User(username, address); //[0] - command, [1] - username, [2] - user address
 		
 		if(this.checkLoginPermissions(tempUser)) {
 			this.connectedUsers.add(tempUser);
 			System.out.println(this.connectedUsers);
-			out.println(this.protocol.createSuccessLoginMessage(tempUser));
+			this.out.println(this.protocol.createSuccessLoginMessage(tempUser));
 		}
 		else {
-			out.println(this.protocol.createFailedLoginMessage(tempUser));
+			this.out.println(this.protocol.createFailedLoginMessage(tempUser));
 		}
 	}
 	
-	public void logoutUser(PrintWriter out, String username, String address) {
+	public void logoutUser(String username, String address) {
 		try {
 			User tempUser = new User(username, address);
 			
 			if(this.checkLogoutPermissions(tempUser)) {
 				this.connectedUsers.remove(tempUser);
 				System.out.println(this.connectedUsers);
-				out.println(this.protocol.createSuccessLogoutMessage(tempUser));
-				out.close();
+				this.out.println(this.protocol.createSuccessLogoutMessage(tempUser));
+				this.out.close();
+				this.in.close();
 				this.socket.close();
 			}
 			else {
@@ -103,28 +109,28 @@ public class ServerThread extends Thread{
 		}
 	}
 	
-	public void createGame(PrintWriter out, String username, String address, String lobbyName, String maxPlayers) {
+	public void createGame(String username, String address, String lobbyName, String maxPlayers) {
 		User tempUser = new User(username, address);
 		Lobby tempLobby = new Lobby(tempUser, lobbyName, Integer.parseInt(maxPlayers));
 		
 		if(this.checkMainMenuPermissions(tempUser) && this.canCreateLobby(tempUser)) {
 			this.gameLobbies.add(tempLobby);
 			System.out.println(this.gameLobbies);
-			out.println(this.protocol.createSuccessGameCreationMessage(tempUser, lobbyName, Integer.parseInt(maxPlayers)));
+			this.out.println(this.protocol.createSuccessGameCreationMessage(tempUser, lobbyName, Integer.parseInt(maxPlayers)));
 		}
 		else {
-			out.println(this.protocol.createFailedGameCreationMessage(tempUser, lobbyName, Integer.parseInt(maxPlayers)));
+			this.out.println(this.protocol.createFailedGameCreationMessage(tempUser, lobbyName, Integer.parseInt(maxPlayers)));
 		}
 	}
 	
-	public void sendLobbyInfo(PrintWriter out, String username, String address) {
+	public void sendLobbyInfo(String username, String address) {
 		User tempUser = new User(username, address);
 		
 		if(this.checkMainMenuPermissions(tempUser)) {
-			out.println(this.protocol.createSuccessViewLobbiesMessage(tempUser, this.gameLobbies));
+			this.out.println(this.protocol.createSuccessViewLobbiesMessage(tempUser, this.gameLobbies));
 		}
 		else {
-			out.println(this.protocol.createFailedViewLobbiesMessage(tempUser, this.gameLobbies));
+			this.out.println(this.protocol.createFailedViewLobbiesMessage(tempUser, this.gameLobbies));
 		}
 	}
 	
