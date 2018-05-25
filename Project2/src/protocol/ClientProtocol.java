@@ -39,4 +39,11 @@ public class ClientProtocol {
 		System.out.println("CLIENT SENT: " + message);
 		return message;
 	}
+
+	public String createEnterLobbyMessage(User user, int lobbyID) {
+		String message = "ENTERLOBBY" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress() + 
+				Utilities.protocolDivider + lobbyID;
+		System.out.println("CLIENT SENT: " + message);
+		return message;
+	}
 }

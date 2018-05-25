@@ -1,5 +1,8 @@
 package utils;
 
+import logic.Lobby;
+import logic.User;
+
 public class ClientUI {
 
 	public static void showLoginScreen() {
@@ -56,16 +59,48 @@ public class ClientUI {
 	
 	public static void showLobbiesScreen(String[] lobbies) {
 		Utilities.clearConsole();
-		int index = 1;
 		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
 		System.out.println("|| ID |   LOBBY NAME   |   OWNER   |   PLAYERS   ||");
 		System.out.println("||-----------------------------------------------||");
+		System.out.println("||    |                |           |             ||");
 		
-		for(int i = 0; i < lobbies.length; i += 4) {
-			System.out.println(String.format("|| %2s | %14s | %9s |    %2s/%2s    ||", index, lobbies[i], lobbies[i+1], lobbies[i+2], lobbies[i+3]));
-			index++;
+		for(int i = 0; i < lobbies.length; i += 6) {
+			System.out.println(String.format("|| %2s | %14s | %9s |    %2s/%2s    ||", lobbies[i], lobbies[i+1], lobbies[i+2], lobbies[i+4], lobbies[i+5]));
 		}
 		
+		System.out.println("||    |                |           |             ||");
+		System.out.println("||-----------------------------------------------||");
+		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
+		System.out.println("||ENTER A LOBBY BY TYPING ITS ID. PRESS '0' TO GO||");
+		System.out.println("||             BACK TO THE MAIN MENU             ||");
+		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
+	}
+	
+	public static void showCurrentLobbyScreen(Lobby lobby) {
+		Utilities.clearConsole();
+		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
+		System.out.println(String.format("||                 %14s                ||", lobby.getName()));
+		System.out.println("||-----------------------------------------------||");
+		System.out.println("||          PLAYER NAME          |     READY     ||");
+		System.out.println("||-----------------------------------------------||");
+		System.out.println("||                               |               ||");
+		
+		String s = new String();
+		
+		for(User user : lobby.getUsers()) {
+			if(user.isReady()) {
+				s = "YES";
+			}
+			else {
+				s = "---";
+			}
+			System.out.println(String.format("||         %13s         |      %3s      ||", user.getUsername(), s));
+		}
+		
+		System.out.println("||                               |               ||");
+		System.out.println("||-----------------------------------------------||");
+		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
+		System.out.println("||                                               ||");
 		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
 	}
 }

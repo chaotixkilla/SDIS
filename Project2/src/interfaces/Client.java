@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashSet;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,6 +14,7 @@ import java.util.regex.Pattern;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import logic.Lobby;
 import logic.User;
 import protocol.ClientProtocol;
 import utils.ClientUI;
@@ -24,6 +26,7 @@ public class Client {
 	private SSLSocket socket;
 	private ClientProtocol protocol;
 	private User currentUser;
+	private Lobby currentLobby;
 	
 	private Scanner scanner = new Scanner(System.in);
 	private PrintWriter out;
@@ -92,6 +95,7 @@ public class Client {
 				break;
 			case "SUCCESSCREATEGAME":
 				System.out.println("CRIEI JOGO");
+				this.createLobby(tokens[3]);
 				break;
 			case "SUCCESSVIEWLOBBIES":
 				this.viewLobbies(tokens[3]);
@@ -147,9 +151,42 @@ public class Client {
 		this.receiveMessage();
 	}
 	
+	public void createLobby(String message) {
+		String[] lobbyInfo = message.split("/////"); //[0]: lobbyName, [1]: lobbyHost, [2]: lobbyHostAddress, [3]: currentPlayers, [4]: maxPlayers, [5]: allPlayerInfo
+		
+		String lobbyName = lobbyInfo[0];
+		String hostName = lobbyInfo[1];
+		String hostAddress = lobbyInfo[2];
+		int currPlayers = Integer.parseInt(lobbyInfo[3]);
+		int maxPlayers = Integer.parseInt(lobbyInfo[4]);
+		HashSet<User> users = new HashSet<User>();
+		
+		String[] players = lobbyInfo[5].split("#####"); //[0]: playerName, [1]: playerAddress, [2]: isReady, [3]: 2nd playerName, ...
+		
+		for(int i = 0; i < players.length; i += 3) {
+			users.add(new User(players[i], players[i+1], Boolean.parseBoolean(players[i+2])));
+		}
+		
+		this.currentLobby = new Lobby(new User(hostName, hostAddress), lobbyName, users, currPlayers, maxPlayers);
+		ClientUI.showCurrentLobbyScreen(this.currentLobby);
+	}
+	
 	public void viewLobbies(String message) {
-		String[] lobbyInfo = message.split("/////"); //[0] ate [3] e um lobby, [4] a [7] outro, etc...
+		String[] lobbyInfo = message.split("/////"); //[0] ate [5] e um lobby, [6] a [11] outro, etc...
 		ClientUI.showLobbiesScreen(lobbyInfo);
+		int command = this.getUserOption(0, lobbyInfo.length/6);
+		
+		if(command > 0) {
+			this.out.println(this.protocol.createEnterLobbyMessage(this.currentUser, command));
+			this.receiveMessage();
+		}
+		else {
+			try {
+				this.mainMenu();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public String getUserInput() {

@@ -9,11 +9,22 @@ public class Lobby {
 	private int currentPlayers;
 	private int maxPlayers;
 	
+	//game
+	private boolean hasStarted;
+	
 	public Lobby(User host, String name, int maxPlayers) {
 		this.host = host;
 		this.name = name;
 		this.users = new HashSet<User>();
 		this.currentPlayers = 1;
+		this.maxPlayers = maxPlayers;
+	}
+	
+	public Lobby(User host, String name, HashSet<User> users, int currentPlayers, int maxPlayers) {
+		this.host = host;
+		this.name = name;
+		this.users = users;
+		this.currentPlayers = currentPlayers;
 		this.maxPlayers = maxPlayers;
 	}
 	
@@ -45,7 +56,15 @@ public class Lobby {
 	}
 	
 	public String getLobbyInfo() {
-		String info = this.name + "/////" + this.host.getUsername() + "/////" + this.currentPlayers + "/////" + this.maxPlayers + "/////";
+		String info = this.name + "/////" + this.host.getUsername() + "/////" + this.host.getAddress() + "/////" + this.currentPlayers + "/////" + this.maxPlayers + "/////";
+		return info;
+	}
+	
+	public String getLobbyFullInfo() {
+		String info = this.name + "/////" + this.host.getUsername() + "/////" + this.host.getAddress() + "/////" + this.currentPlayers + "/////" + this.maxPlayers + "/////";
+		for(User user : this.users) {
+			info += user.getUserInfo();
+		}
 		return info;
 	}
 	

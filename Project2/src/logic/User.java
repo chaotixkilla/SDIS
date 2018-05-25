@@ -4,9 +4,18 @@ public class User {
 	private String username;
 	private String address;
 	
+	//game variables
+	private boolean isReady;
+	
 	public User(String username, String address) {
 		this.username = username;
 		this.address = address;
+	}
+	
+	public User(String username, String address, boolean isReady) {
+		this.username = username;
+		this.address = address;
+		this.isReady = isReady;
 	}
 	
 	public String getUsername() {
@@ -15,6 +24,23 @@ public class User {
 	
 	public String getAddress() {
 		return this.address;
+	}
+	
+	public boolean isReady() {
+		return this.isReady;
+	}
+	
+	public void ready() {
+		this.isReady = true;
+	}
+	
+	public void notReady() {
+		this.isReady = false;
+	}
+	
+	public String getUserInfo() {
+		String info = this.getUsername() + "#####" + this.getAddress() + "#####" + this.isReady + "#####";
+		return info;
 	}
 	
 	public int hashCode() {

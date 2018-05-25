@@ -1,6 +1,8 @@
 package protocol;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import logic.Lobby;
 import logic.User;
@@ -30,31 +32,36 @@ public class ServerProtocol {
 		return message;
 	}
 
-	public String createSuccessGameCreationMessage(User user, String lobbyName, int maxPlayers) {
+	public String createSuccessGameCreationMessage(User user, Lobby createdLobby) {
 		String message = "SUCCESSCREATEGAME" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + 
-				user.getAddress() + Utilities.protocolDivider + lobbyName + Utilities.protocolDivider + maxPlayers;
+				user.getAddress() + Utilities.protocolDivider + createdLobby.getLobbyFullInfo();
 		System.out.println("SERVER SENT: " + message);
 		return message;
 	}
 	
-	public String createFailedGameCreationMessage(User user, String lobbyName, int maxPlayers) {
+	public String createFailedGameCreationMessage(User user, Lobby createdLobby) {
 		String message = "FAILEDCREATEGAME" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + 
-				user.getAddress() + Utilities.protocolDivider + lobbyName + Utilities.protocolDivider + maxPlayers;
+				user.getAddress() + Utilities.protocolDivider + createdLobby.getLobbyFullInfo();
 		System.out.println("SERVER SENT: " + message);
 		return message;
 	}
 	
-	public String createSuccessViewLobbiesMessage(User user, HashSet<Lobby> lobbies) {
+	public String createSuccessViewLobbiesMessage(User user, HashMap<Integer, Lobby> lobbies) {
 		String message = "SUCCESSVIEWLOBBIES" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider +
 				user.getAddress() + Utilities.protocolDivider;
-		for(Lobby lobby : lobbies) {
+		/*for(Lobby lobby : lobbies) {
 			message += lobby.getLobbyInfo();
+		}*/
+		
+		for(Map.Entry<Integer, Lobby> lobby : lobbies.entrySet()) {
+			message += lobby.getKey() + "/////" + lobby.getValue().getLobbyInfo();
 		}
+		
 		System.out.println("SERVER SENT: " + message);
 		return message;
 	}
 	
-	public String createFailedViewLobbiesMessage(User user, HashSet<Lobby> lobbies) {
+	public String createFailedViewLobbiesMessage(User user, HashMap<Integer, Lobby> lobbies) {
 		return null;
 		
 	}

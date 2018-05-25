@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -20,8 +21,8 @@ import logic.User;
 
 public class Server {
 	private SSLServerSocket socket;
-	private HashSet<User> connectedUsers;
-	private HashSet<Lobby> gameLobbies;
+	private HashMap<User, ServerThread> connectedUsers;
+	private HashMap<Integer, Lobby> gameLobbies;
 	private HashMap<Integer, String> loadedDictionary;
 
 	public static void main(String[] args) {
@@ -39,8 +40,8 @@ public class Server {
 			this.socket = (SSLServerSocket) sslFactory.createServerSocket(10500); //random available port
 			this.socket.setNeedClientAuth(true);
 			this.socket.setEnabledCipherSuites(sslFactory.getDefaultCipherSuites());
-			this.connectedUsers = new HashSet<User>();
-			this.gameLobbies = new HashSet<Lobby>();
+			this.connectedUsers = new HashMap<User, ServerThread>();
+			this.gameLobbies = new HashMap<Integer, Lobby>();
 			this.loadedDictionary = new HashMap<Integer, String>();
 		} catch (SocketException e) {
 			e.printStackTrace();
