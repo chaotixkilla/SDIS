@@ -93,12 +93,21 @@ public class Client {
 			case "LOGOUTSUCCESS":
 				this.closeClient();
 				break;
-			case "SUCCESSCREATEGAME":
-				System.out.println("CRIEI JOGO");
-				this.createLobby(tokens[3]);
+			case "CREATEGAMESUCCESS":
+				this.viewLobby(tokens[3]);
 				break;
-			case "SUCCESSVIEWLOBBIES":
+			case "CREATEGAMEFAILURE":
+				break;
+			case "VIEWLOBBIESSUCCESS":
 				this.viewLobbies(tokens[3]);
+				break;
+			case "VIEWLOBBIESFAILURE":
+				break;
+			case "ENTERGAMESUCCESS":
+				this.viewLobby(tokens[3]);
+				break;
+			case "ENTERGAMEFAILURE":
+				this.mainMenu();
 				break;
 			default:
 				break;
@@ -151,7 +160,7 @@ public class Client {
 		this.receiveMessage();
 	}
 	
-	public void createLobby(String message) {
+	public void viewLobby(String message) {
 		String[] lobbyInfo = message.split("/////"); //[0]: lobbyName, [1]: lobbyHost, [2]: lobbyHostAddress, [3]: currentPlayers, [4]: maxPlayers, [5]: allPlayerInfo
 		
 		String lobbyName = lobbyInfo[0];
@@ -169,6 +178,7 @@ public class Client {
 		
 		this.currentLobby = new Lobby(new User(hostName, hostAddress), lobbyName, users, currPlayers, maxPlayers);
 		ClientUI.showCurrentLobbyScreen(this.currentLobby);
+		this.receiveMessage();
 	}
 	
 	public void viewLobbies(String message) {

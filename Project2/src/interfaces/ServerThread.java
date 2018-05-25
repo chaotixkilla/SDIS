@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import javax.net.ssl.SSLSocket;
@@ -76,16 +75,8 @@ public class ServerThread extends Thread{
 			case "VIEWLOBBIES":
 				this.sendLobbyInfo(tokens[1], tokens[2]);
 				break;
-			case "TESTEENTRAR":
-				System.out.println("HERE");
-				for(Map.Entry<User, ServerThread> entry : this.connectedUsers.entrySet()) {
-					try {
-						PrintWriter p = new PrintWriter(entry.getValue().getSocket().getOutputStream(), true);
-						p.println("teste");
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
+			case "ENTERLOBBY":
+				this.enterLobby(tokens[1], tokens[2], tokens[3]);
 				break;
 			default:
 				break;
@@ -151,6 +142,29 @@ public class ServerThread extends Thread{
 		}
 	}
 	
+	public void enterLobby(String username, String address, String lobbyID) {
+		User tempUser = new User(username, address, false);
+		Lobby lobby = this.gameLobbies.get(Integer.parseInt(lobbyID));
+		
+		if(this.canEnterLobby(tempUser, lobby)) {
+			lobby.addUser(tempUser);
+			this.out.println(this.protocol.createSuccessEnterGameMessage(tempUser, lobby));
+			for(User user : this.gameLobbies.get(Integer.parseInt(lobbyID)).getUsers()) {
+				if(!user.equals(tempUser)) {
+					String msg = this.protocol.createSuccessEnterGameMessage(tempUser, lobby);
+					try {
+						new PrintWriter(this.connectedUsers.get(user).getSocket().getOutputStream(), true).println(msg);
+					} catch (IOException e) {
+						e.printStackTrace();
+					};
+				}
+			}
+		}
+		else {
+			this.out.println(this.protocol.createFailedEnterGameMessage(tempUser, lobby));
+		}
+	}
+	
 	/*
 	 * USER PERMISSIONS
 	 */
@@ -163,11 +177,6 @@ public class ServerThread extends Thread{
 	
 	public boolean checkMainMenuPermissions(User user) {
 		boolean flag = true;
-		/*for(Lobby l : this.gameLobbies) {
-			if(l.isInLobby(user)) {
-				flag = false;
-			}
-		}*/
 		
 		for(Map.Entry<Integer, Lobby> lobby : this.gameLobbies.entrySet()) {
 			if(lobby.getValue().isInLobby(user)) {
@@ -179,11 +188,6 @@ public class ServerThread extends Thread{
 	
 	public boolean checkLogoutPermissions(User user) {
 		boolean flag = true;
-		/*for(Lobby l : this.gameLobbies) {
-			if(l.isInLobby(user)) {
-				flag = false;
-			}
-		}*/
 		
 		for(Map.Entry<Integer, Lobby> lobby : this.gameLobbies.entrySet()) {
 			if(lobby.getValue().isInLobby(user)) {
@@ -196,18 +200,29 @@ public class ServerThread extends Thread{
 	
 	public boolean canCreateLobby(User user) {
 		boolean flag = true;
-		/*for(Lobby lobby : this.gameLobbies) {
-			if(lobby.isInLobby(user)) {
-				flag = false;
-			}
-		}*/
 		
 		for(Map.Entry<Integer, Lobby> lobby : this.gameLobbies.entrySet()) {
 			if(lobby.getValue().isInLobby(user)) {
 				flag = false;
 			}
 		}
-		return flag;
+		return this.connectedUsers.containsKey(user) && flag;
+	}
+	
+	public boolean canEnterLobby(User user, Lobby l) {
+		boolean flag = true;
+		
+		for(Map.Entry<Integer, Lobby> lobby : this.gameLobbies.entrySet()) {
+			if(lobby.getValue().isInLobby(user)) {
+				flag = false;
+			}
+		}
+		
+		if(l.isFull()) {
+			flag = false;
+		}
+		
+		return this.connectedUsers.containsKey(user) && flag;
 	}
 	
 }

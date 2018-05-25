@@ -1,7 +1,6 @@
 package protocol;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import logic.Lobby;
@@ -33,25 +32,22 @@ public class ServerProtocol {
 	}
 
 	public String createSuccessGameCreationMessage(User user, Lobby createdLobby) {
-		String message = "SUCCESSCREATEGAME" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + 
+		String message = "CREATEGAMESUCCESS" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + 
 				user.getAddress() + Utilities.protocolDivider + createdLobby.getLobbyFullInfo();
 		System.out.println("SERVER SENT: " + message);
 		return message;
 	}
 	
 	public String createFailedGameCreationMessage(User user, Lobby createdLobby) {
-		String message = "FAILEDCREATEGAME" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + 
+		String message = "CREATEGAMEFAILURE" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + 
 				user.getAddress() + Utilities.protocolDivider + createdLobby.getLobbyFullInfo();
 		System.out.println("SERVER SENT: " + message);
 		return message;
 	}
 	
 	public String createSuccessViewLobbiesMessage(User user, HashMap<Integer, Lobby> lobbies) {
-		String message = "SUCCESSVIEWLOBBIES" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider +
+		String message = "VIEWLOBBIESSUCCESS" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider +
 				user.getAddress() + Utilities.protocolDivider;
-		/*for(Lobby lobby : lobbies) {
-			message += lobby.getLobbyInfo();
-		}*/
 		
 		for(Map.Entry<Integer, Lobby> lobby : lobbies.entrySet()) {
 			message += lobby.getKey() + "/////" + lobby.getValue().getLobbyInfo();
@@ -64,6 +60,20 @@ public class ServerProtocol {
 	public String createFailedViewLobbiesMessage(User user, HashMap<Integer, Lobby> lobbies) {
 		return null;
 		
+	}
+	
+	public String createSuccessEnterGameMessage(User user, Lobby createdLobby) {
+		String message = "ENTERGAMESUCCESS" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + 
+				user.getAddress() + Utilities.protocolDivider + createdLobby.getLobbyFullInfo();
+		System.out.println("SERVER SENT: " + message);
+		return message;
+	}
+	
+	public String createFailedEnterGameMessage(User user, Lobby createdLobby) {
+		String message = "ENTERGAMEFAILURE" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + 
+				user.getAddress() + Utilities.protocolDivider + createdLobby.getLobbyFullInfo();
+		System.out.println("SERVER SENT: " + message);
+		return message;
 	}
 	
 }

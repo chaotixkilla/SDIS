@@ -16,7 +16,7 @@ public class Lobby {
 		this.host = host;
 		this.name = name;
 		this.users = new HashSet<User>();
-		this.currentPlayers = 1;
+		this.currentPlayers = 0;
 		this.maxPlayers = maxPlayers;
 	}
 	
@@ -55,6 +55,10 @@ public class Lobby {
 		return false;
 	}
 	
+	public boolean isFull() {
+		return this.currentPlayers == this.maxPlayers;
+	}
+	
 	public String getLobbyInfo() {
 		String info = this.name + "/////" + this.host.getUsername() + "/////" + this.host.getAddress() + "/////" + this.currentPlayers + "/////" + this.maxPlayers + "/////";
 		return info;
@@ -70,6 +74,7 @@ public class Lobby {
 	
 	public void addUser(User user) {
 		this.users.add(user);
+		this.currentPlayers++;
 	}
 	
 	public int hashcode() {
