@@ -31,11 +31,7 @@ public class User {
 	}
 	
 	public void ready() {
-		this.isReady = true;
-	}
-	
-	public void notReady() {
-		this.isReady = false;
+		this.isReady = !this.isReady;
 	}
 	
 	public String getUserInfo() {

@@ -35,7 +35,6 @@ public class Client {
 	public static void main(String[] args) {
 		Client client = new Client(args[0], args[1]);
 		client.run();
-
 	}
 	
 	protected Client(String hostname, String port) {
@@ -109,6 +108,11 @@ public class Client {
 			case "ENTERGAMEFAILURE":
 				this.mainMenu();
 				break;
+			case "LOBBYREADYSUCCESS":
+				this.viewLobby(tokens[3]);
+				break;
+			case "LOBBYREADYFAILURE":
+				break;
 			default:
 				break;
 		}
@@ -179,7 +183,10 @@ public class Client {
 		this.currentLobby = new Lobby(new User(hostName, hostAddress), lobbyName, users, currPlayers, maxPlayers);
 		ClientUI.showCurrentLobbyScreen(this.currentLobby);
 		
-		/*int command = this.getUserOption(0, 1);
+		//UserInputThread t = new UserInputThread(this.scanner, 0, 1);
+		//t.start();
+		
+		/*int command = this.getUserOption(0, 1, 2000);
 		
 		if(command == 0) {
 			out.println(this.protocol.createLeaveLobbyMessage(this.currentUser, this.currentLobby));
@@ -232,6 +239,26 @@ public class Client {
 		int option = -1;
 		
 		while(this.scanner.hasNext()) {
+			if(this.scanner.hasNextInt()) {
+				option = this.scanner.nextInt();
+				this.scanner.nextLine(); //clear buffer
+				if(option >= min && option <= max) {
+					break;
+				}
+			}
+			else {
+				this.scanner.next();
+			}
+		}
+		return option;
+	}
+	
+	public int getUserOption(int min, int max, int amount) {
+		int option = -1;
+		long start = System.currentTimeMillis();
+		
+		while((System.currentTimeMillis() - start) < amount) {
+			System.out.println((System.currentTimeMillis() - start));
 			if(this.scanner.hasNextInt()) {
 				option = this.scanner.nextInt();
 				this.scanner.nextLine(); //clear buffer

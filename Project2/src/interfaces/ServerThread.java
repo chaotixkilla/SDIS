@@ -59,6 +59,15 @@ public class ServerThread extends Thread{
 		}
 	}
 	
+	public Lobby getUserLobby(User user) {
+		for(Map.Entry<Integer, Lobby> lobby : this.gameLobbies.entrySet()) {
+			if(lobby.getValue().isInLobby(user)) {
+				return lobby.getValue();
+			}
+		}
+		return null;
+	}
+	
 	//remote command solver
 	public void solve(String s) {
 		String[] tokens = s.split(Utilities.protocolDivider);
@@ -81,6 +90,7 @@ public class ServerThread extends Thread{
 			case "LEAVELOBBY":
 				break;
 			case "READYLOBBY":
+				this.readyUser(tokens[1], tokens[2], tokens[3]);
 				break;
 			default:
 				break;
@@ -122,7 +132,7 @@ public class ServerThread extends Thread{
 	}
 	
 	public void createGame(String username, String address, String lobbyName, String maxPlayers) {
-		User tempUser = new User(username, address);
+		User tempUser = new User(username, address, true);
 		Lobby tempLobby = new Lobby(tempUser, lobbyName, Integer.parseInt(maxPlayers));
 		
 		if(this.checkMainMenuPermissions(tempUser) && this.canCreateLobby(tempUser)) {
@@ -147,7 +157,7 @@ public class ServerThread extends Thread{
 	}
 	
 	public void enterLobby(String username, String address, String lobbyID) {
-		User tempUser = new User(username, address, false);
+		User tempUser = new User(username, address, true);
 		Lobby lobby = this.gameLobbies.get(Integer.parseInt(lobbyID));
 		
 		if(this.canEnterLobby(tempUser, lobby)) {
@@ -166,6 +176,34 @@ public class ServerThread extends Thread{
 		}
 		else {
 			this.out.println(this.protocol.createFailedEnterGameMessage(tempUser, lobby));
+		}
+	}
+	
+	public void readyUser(String username, String address, String lobby) {
+		String[] lobbyInfo = lobby.split("/////");
+		User tempUser = new User(username, address);
+		Lobby tempLobby = new Lobby(tempUser, lobbyInfo[0], Integer.parseInt(lobbyInfo[4]));
+		
+		if(this.canReadyUp(tempUser, tempLobby)) {
+			Lobby l = this.getUserLobby(tempUser);
+			for(User u : l.getUsers()) {
+				if(u.equals(tempUser)) {
+					System.out.println(u.getUserInfo());
+					System.out.println(tempUser.getUserInfo());
+					u.ready();
+				}
+			}
+			for(User u : l.getUsers()) {
+				String msg = this.protocol.createSuccessLobbyReadyMessage(u, l);
+				try {
+					new PrintWriter(this.connectedUsers.get(u).getSocket().getOutputStream(), true).println(msg);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		else {
+			this.protocol.createFailedLobbyReadyMessage(tempUser, tempLobby);
 		}
 	}
 	
@@ -224,6 +262,18 @@ public class ServerThread extends Thread{
 		
 		if(l.isFull()) {
 			flag = false;
+		}
+		
+		return this.connectedUsers.containsKey(user) && flag;
+	}
+	
+	public boolean canReadyUp(User user, Lobby lobby) {
+		boolean flag = false;
+		
+		for(Map.Entry<Integer, Lobby> l : this.gameLobbies.entrySet()) {
+			if(l.getValue().isInLobby(user)) {
+				flag = true;
+			}
 		}
 		
 		return this.connectedUsers.containsKey(user) && flag;
