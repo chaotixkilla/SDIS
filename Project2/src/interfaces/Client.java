@@ -178,6 +178,16 @@ public class Client {
 		
 		this.currentLobby = new Lobby(new User(hostName, hostAddress), lobbyName, users, currPlayers, maxPlayers);
 		ClientUI.showCurrentLobbyScreen(this.currentLobby);
+		
+		/*int command = this.getUserOption(0, 1);
+		
+		if(command == 0) {
+			out.println(this.protocol.createLeaveLobbyMessage(this.currentUser, this.currentLobby));
+		}
+		else {
+			out.println(this.protocol.createLobbyReadyMessage(this.currentUser, this.currentLobby));
+		}*/
+		
 		this.receiveMessage();
 	}
 	

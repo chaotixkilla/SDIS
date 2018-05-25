@@ -78,6 +78,10 @@ public class ServerThread extends Thread{
 			case "ENTERLOBBY":
 				this.enterLobby(tokens[1], tokens[2], tokens[3]);
 				break;
+			case "LEAVELOBBY":
+				break;
+			case "READYLOBBY":
+				break;
 			default:
 				break;
 		}

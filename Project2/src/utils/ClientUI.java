@@ -100,7 +100,7 @@ public class ClientUI {
 		System.out.println("||                               |               ||");
 		System.out.println("||-----------------------------------------------||");
 		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
-		System.out.println("||                                               ||");
+		System.out.println("||'1': GET READY           '0': BACK TO MAIN MENU||");
 		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
 	}
 }

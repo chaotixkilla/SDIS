@@ -1,5 +1,6 @@
 package protocol;
 
+import logic.Lobby;
 import logic.User;
 import utils.Utilities;
 
@@ -43,6 +44,20 @@ public class ClientProtocol {
 	public String createEnterLobbyMessage(User user, int lobbyID) {
 		String message = "ENTERLOBBY" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress() + 
 				Utilities.protocolDivider + lobbyID;
+		System.out.println("CLIENT SENT: " + message);
+		return message;
+	}
+
+	public String createLeaveLobbyMessage(User user, Lobby lobby) {
+		String message = "LEAVELOBBY" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress() + 
+				Utilities.protocolDivider + lobby.getLobbyInfo();
+		System.out.println("CLIENT SENT: " + message);
+		return message;
+	}
+
+	public String createLobbyReadyMessage(User user, Lobby lobby) {
+		String message = "READYLOBBY" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress() + 
+				Utilities.protocolDivider + lobby.getLobbyInfo();
 		System.out.println("CLIENT SENT: " + message);
 		return message;
 	}
