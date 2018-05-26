@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -101,6 +102,7 @@ public class Client {
 				this.viewLobbies(tokens[3]);
 				break;
 			case "VIEWLOBBIESFAILURE":
+				this.mainMenu();
 				break;
 			case "ENTERGAMESUCCESS":
 				this.viewLobby(tokens[3]);
@@ -112,6 +114,9 @@ public class Client {
 				this.viewLobby(tokens[3]);
 				break;
 			case "LOBBYREADYFAILURE":
+				break;
+			case "STARTGAMESUCCESS":
+				this.viewGame(tokens[3]);
 				break;
 			default:
 				break;
@@ -152,7 +157,7 @@ public class Client {
 				this.out.println(this.protocol.createViewLobbiesMessage(this.currentUser));
 				break;
 			case 3:
-				this.out.println(this.protocol.createViewRulesMessage(this.currentUser));
+				this.viewGameRulesMenu();
 				break;
 			case 4:
 				this.out.println(this.protocol.createLogoutMessage(this.currentUser));
@@ -164,7 +169,21 @@ public class Client {
 		this.receiveMessage();
 	}
 	
-	public void viewLobby(String message) {
+	public void viewGameRulesMenu() {
+		ClientUI.showRulesScreen();
+		
+		int option = this.getUserOption(0, 0);
+		
+		if(option == 0) {
+			try {
+				this.mainMenu();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void updateCurrentLobby(String message) {
 		String[] lobbyInfo = message.split("/////"); //[0]: lobbyName, [1]: lobbyHost, [2]: lobbyHostAddress, [3]: currentPlayers, [4]: maxPlayers, [5]: allPlayerInfo
 		
 		String lobbyName = lobbyInfo[0];
@@ -172,7 +191,7 @@ public class Client {
 		String hostAddress = lobbyInfo[2];
 		int currPlayers = Integer.parseInt(lobbyInfo[3]);
 		int maxPlayers = Integer.parseInt(lobbyInfo[4]);
-		HashSet<User> users = new HashSet<User>();
+		ArrayList<User> users = new ArrayList<User>();
 		
 		String[] players = lobbyInfo[5].split("#####"); //[0]: playerName, [1]: playerAddress, [2]: isReady, [3]: 2nd playerName, ...
 		
@@ -181,11 +200,41 @@ public class Client {
 		}
 		
 		this.currentLobby = new Lobby(new User(hostName, hostAddress), lobbyName, users, currPlayers, maxPlayers);
+	}
+	
+	public void updateCurrentGame(String message) {
+		String[] lobbyInfo = message.split("/////"); //[0]: lobbyName, [1]: lobbyHost, [2]: lobbyHostAddress, [3]: currentPlayers, [4]: maxPlayers, [5]: allPlayerInfo
+		
+		String lobbyName = lobbyInfo[0];
+		String hostName = lobbyInfo[1];
+		String hostAddress = lobbyInfo[2];
+		int currPlayers = Integer.parseInt(lobbyInfo[3]);
+		int maxPlayers = Integer.parseInt(lobbyInfo[4]);
+		boolean hasStarted = Boolean.parseBoolean(lobbyInfo[5]);
+		User currentJudge = new User(lobbyInfo[6], lobbyInfo[7]);
+		ArrayList<User> users = new ArrayList<User>();
+		ArrayList<String> words = new ArrayList<String>();
+		words.add(lobbyInfo[8]);
+		words.add(lobbyInfo[9]);
+		
+		String[] players = lobbyInfo[10].split("#####"); //[0]: playerName, [1]: playerAddress, [2]: isReady, [3]: 2nd playerName, ...
+		
+		for(int i = 0; i < players.length; i += 4) {
+			users.add(new User(players[i], players[i+1], Boolean.parseBoolean(players[i+2]), Integer.parseInt(players[i+3])));
+		}
+		
+		this.currentLobby = new Lobby(new User(hostName, hostAddress), lobbyName, users, currPlayers, maxPlayers, hasStarted, currentJudge, words);
+		
+	}
+	
+	public void viewLobby(String message) {
+		this.updateCurrentLobby(message);
 		ClientUI.showCurrentLobbyScreen(this.currentLobby);
 		
 		//UserInputThread t = new UserInputThread(this.scanner, 0, 1);
 		//t.start();
 		
+		//gets lobby input (doesnt work)
 		/*int command = this.getUserOption(0, 1, 2000);
 		
 		if(command == 0) {
@@ -214,6 +263,11 @@ public class Client {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	private void viewGame(String message) {
+		this.updateCurrentGame(message);
+		ClientUI.showGameScreen(this.currentLobby);
 	}
 	
 	public String getUserInput() {

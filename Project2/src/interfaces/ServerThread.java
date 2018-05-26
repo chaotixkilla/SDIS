@@ -148,11 +148,11 @@ public class ServerThread extends Thread{
 	public void sendLobbyInfo(String username, String address) {
 		User tempUser = new User(username, address);
 		
-		if(this.checkMainMenuPermissions(tempUser)) {
+		if(this.checkMainMenuPermissions(tempUser) && this.gameLobbies.size() > 0) {
 			this.out.println(this.protocol.createSuccessViewLobbiesMessage(tempUser, this.gameLobbies));
 		}
 		else {
-			this.out.println(this.protocol.createFailedViewLobbiesMessage(tempUser, this.gameLobbies));
+			this.out.println(this.protocol.createFailedViewLobbiesMessage(tempUser));
 		}
 	}
 	
@@ -177,6 +177,8 @@ public class ServerThread extends Thread{
 		else {
 			this.out.println(this.protocol.createFailedEnterGameMessage(tempUser, lobby));
 		}
+		
+		this.checkGameStart(lobby);
 	}
 	
 	public void readyUser(String username, String address, String lobby) {
@@ -188,8 +190,6 @@ public class ServerThread extends Thread{
 			Lobby l = this.getUserLobby(tempUser);
 			for(User u : l.getUsers()) {
 				if(u.equals(tempUser)) {
-					System.out.println(u.getUserInfo());
-					System.out.println(tempUser.getUserInfo());
 					u.ready();
 				}
 			}
@@ -203,7 +203,25 @@ public class ServerThread extends Thread{
 			}
 		}
 		else {
-			this.protocol.createFailedLobbyReadyMessage(tempUser, tempLobby);
+			String msg = this.protocol.createFailedLobbyReadyMessage(tempUser, tempLobby);
+			//send message
+		}
+	}
+	
+	public void checkGameStart(Lobby lobby) {
+		if(lobby.getUsers().size() == lobby.getMaxPlayers() && lobby.isEveryoneReady()) {
+			//starts game
+			
+			lobby.startGame();
+			
+			for(User u : lobby.getUsers()) {
+				String msg = this.protocol.createSuccessStartGameMessage(u, lobby);
+				try {
+					new PrintWriter(this.connectedUsers.get(u).getSocket().getOutputStream(), true).println(msg);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 	

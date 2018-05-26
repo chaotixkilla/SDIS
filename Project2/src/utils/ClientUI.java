@@ -100,7 +100,56 @@ public class ClientUI {
 		System.out.println("||                               |               ||");
 		System.out.println("||-----------------------------------------------||");
 		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
-		System.out.println("||'1': GET READY           '0': BACK TO MAIN MENU||");
+		System.out.println("||'1': (UN)READY           '0': BACK TO MAIN MENU||");
+		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
+	}
+	
+	
+	public static void showGameScreen(Lobby lobby) {
+		Utilities.clearConsole();
+		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
+		System.out.println(String.format("||                  %12s                 ||", lobby.getName()));
+		System.out.println("||-----------------------------------------------||");
+		System.out.println(String.format("|| CURRENT JUDGE: %14s                 ||", lobby.getCurrentJudge().getUsername()));
+		System.out.println("||-----------------------------------------------||");
+		System.out.println("||                  ROUND WORDS                  ||");
+		System.out.println("||-----------------------------------------------||");
+		System.out.println(String.format("||     %15s   |   %15s     ||", lobby.getRoundWords().get(0), lobby.getRoundWords().get(1)));
+		System.out.println("||-----------------------------------------------||");
+		System.out.println("||          PLAYER NAME          |     SCORE     ||");
+		System.out.println("||-----------------------------------------------||");
+		
+		for(User user : lobby.getUsers()) {
+			System.out.println(String.format("||         %13s         |      %3s      ||", user.getUsername(), user.getGameScore()));
+		}
+		
+		System.out.println("||-----------------------------------------------||");
+		System.out.println("||                                               ||");
+		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
+		
+		System.out.println(lobby.getGameFullInfo());
+	}
+
+	public static void showRulesScreen() {
+		Utilities.clearConsole();
+		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
+		System.out.println("||                  GAME RULES                   ||");
+		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
+		System.out.println("||                                               ||");
+		System.out.println("||                                               ||");
+		System.out.println("||      At the beginning of each round, two      ||");
+		System.out.println("||    words will be randomly generated and all   ||");
+		System.out.println("||  players (except one for round which will be  ||");
+		System.out.println("||      the round\'s judge) have to input a      ||");
+		System.out.println("||   sentence containing both words. At the end  ||");
+		System.out.println("||    of the round, the judge will vote on the   ||");
+		System.out.println("||     best, awarding a point to the author.     ||");
+		System.out.println("||                                               ||");
+		System.out.println("||    After ten rounds, the player with the      ||");
+		System.out.println("||              highest score wins!              ||");
+		System.out.println("||                                               ||");
+		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
+		System.out.println("||     PRESS '0' TO GO BACK TO THE MAIN MENU     ||");
 		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
 	}
 }

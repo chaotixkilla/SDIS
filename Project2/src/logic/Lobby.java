@@ -1,31 +1,46 @@
 package logic;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class Lobby {
 	private User host;
 	private String name;
-	private HashSet<User> users;
+	private ArrayList<User> users;
 	private int currentPlayers;
 	private int maxPlayers;
 	
 	//game
 	private boolean hasStarted;
+	private User currentJudge;
+	private int judgeIndex = 0;
+	private ArrayList<String> roundWords;
 	
 	public Lobby(User host, String name, int maxPlayers) {
 		this.host = host;
 		this.name = name;
-		this.users = new HashSet<User>();
+		this.users = new ArrayList<User>();
 		this.currentPlayers = 0;
 		this.maxPlayers = maxPlayers;
 	}
 	
-	public Lobby(User host, String name, HashSet<User> users, int currentPlayers, int maxPlayers) {
+	public Lobby(User host, String name, ArrayList<User> users, int currentPlayers, int maxPlayers) {
 		this.host = host;
 		this.name = name;
 		this.users = users;
 		this.currentPlayers = currentPlayers;
 		this.maxPlayers = maxPlayers;
+	}
+	
+	public Lobby(User host, String name, ArrayList<User> users, int currentPlayers, int maxPlayers, boolean hasStarted, User currentJudge, ArrayList<String> roundWords) {
+		this.host = host;
+		this.name = name;
+		this.users = users;
+		this.currentPlayers = currentPlayers;
+		this.maxPlayers = maxPlayers;
+		this.hasStarted = hasStarted;
+		this.currentJudge = currentJudge;
+		this.roundWords = roundWords;
 	}
 	
 	public User getHost() {
@@ -36,7 +51,7 @@ public class Lobby {
 		return this.name;
 	}
 	
-	public HashSet<User> getUsers(){
+	public ArrayList<User> getUsers(){
 		return this.users;
 	}
 	
@@ -46,6 +61,14 @@ public class Lobby {
 	
 	public int getMaxPlayers() {
 		return this.maxPlayers;
+	}
+	
+	public User getCurrentJudge() {
+		return this.currentJudge;
+	}
+	
+	public ArrayList<String> getRoundWords() {
+		return this.roundWords;
 	}
 	
 	public boolean isInLobby(User user) {
@@ -59,6 +82,33 @@ public class Lobby {
 		return this.currentPlayers == this.maxPlayers;
 	}
 	
+	public boolean isEveryoneReady() {
+		boolean flag = true;
+		for(User u : users) {
+			if(!u.isReady()) {
+				flag = false;
+			}
+		}
+		return flag;
+	}
+	
+	public void startGame() {
+		this.hasStarted = true;
+		for(User u : this.users) {
+			u.startGameVariables();
+		}
+		this.currentJudge = this.users.get(judgeIndex);
+		this.roundWords = new ArrayList<String>();
+		
+		//testing purposes
+		this.roundWords.add("teste");
+		this.roundWords.add("palavra");
+	}
+	
+	public void giveRoundWords(ArrayList<String> roundWords) {
+		this.roundWords = roundWords;
+	}
+	
 	public String getLobbyInfo() {
 		String info = this.name + "/////" + this.host.getUsername() + "/////" + this.host.getAddress() + "/////" + this.currentPlayers + "/////" + this.maxPlayers + "/////";
 		return info;
@@ -68,6 +118,17 @@ public class Lobby {
 		String info = this.name + "/////" + this.host.getUsername() + "/////" + this.host.getAddress() + "/////" + this.currentPlayers + "/////" + this.maxPlayers + "/////";
 		for(User user : this.users) {
 			info += user.getUserInfo();
+		}
+		return info;
+	}
+	
+	public String getGameFullInfo() {
+		String info = this.name + "/////" + this.host.getUsername() + "/////" + this.host.getAddress() + 
+				"/////" + this.currentPlayers + "/////" + this.maxPlayers + "/////" + this.hasStarted + 
+				"/////" + this.currentJudge.getUsername() + "/////" + this.currentJudge.getAddress() + 
+				"/////" + this.roundWords.get(0) + "/////" + this.roundWords.get(1) + "/////";
+		for(User user : this.users) {
+			info += user.getUserFullInfo();
 		}
 		return info;
 	}

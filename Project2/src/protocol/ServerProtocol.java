@@ -57,9 +57,11 @@ public class ServerProtocol {
 		return message;
 	}
 	
-	public String createFailedViewLobbiesMessage(User user, HashMap<Integer, Lobby> lobbies) {
-		return null;
-		
+	public String createFailedViewLobbiesMessage(User user) {
+		String message = "VIEWLOBBIESFAILURE" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider +
+				user.getAddress() + Utilities.protocolDivider;
+		System.out.println("SERVER SENT: " + message);
+		return message;
 	}
 	
 	public String createSuccessEnterGameMessage(User user, Lobby lobby) {
@@ -86,6 +88,13 @@ public class ServerProtocol {
 	public String createFailedLobbyReadyMessage(User user, Lobby lobby) {
 		String message = "LOBBYREADYFAILURE" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + 
 				user.getAddress() + Utilities.protocolDivider + lobby.getLobbyFullInfo();
+		System.out.println("SERVER SENT: " + message);
+		return message;
+	}
+
+	public String createSuccessStartGameMessage(User user, Lobby lobby) {
+		String message = "STARTGAMESUCCESS" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + 
+				user.getAddress() + Utilities.protocolDivider + lobby.getGameFullInfo();
 		System.out.println("SERVER SENT: " + message);
 		return message;
 	}
