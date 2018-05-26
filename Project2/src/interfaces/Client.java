@@ -6,8 +6,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.rmi.ConnectException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,7 +65,7 @@ public class Client {
 
 			this.scanner.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("Connection with server not successful, exiting program...");
 		}
 	}
 	

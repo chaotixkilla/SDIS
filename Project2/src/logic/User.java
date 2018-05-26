@@ -8,6 +8,10 @@ public class User {
 	private boolean isReady;
 	private int gameScore;
 	
+	public User() {
+		
+	}
+	
 	public User(String username, String address) {
 		this.username = username;
 		this.address = address;

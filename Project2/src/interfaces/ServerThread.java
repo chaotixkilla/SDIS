@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +23,7 @@ public class ServerThread extends Thread{
 	
 	private PrintWriter out;
 	private BufferedReader in;
+	private boolean online;
 	
 	public ServerThread(SSLSocket socket, HashMap<User, ServerThread> connectedUsers, HashMap<Integer, Lobby> gameLobbies) {
 		try {
@@ -30,7 +32,8 @@ public class ServerThread extends Thread{
 			this.gameLobbies = gameLobbies;
 			this.protocol = new ServerProtocol();
 			this.out = new PrintWriter(this.socket.getOutputStream(), true);
-			this.in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));		
+			this.in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));	
+			this.online = true;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -39,7 +42,7 @@ public class ServerThread extends Thread{
 	@Override
 	public void run() {
 		try {
-			while(true) {
+			while(this.online) {
 				this.receiveMessage();
 			}
 		} catch (IOException e) {
@@ -51,11 +54,30 @@ public class ServerThread extends Thread{
 		return this.socket;
 	}
 	
+	public boolean equals(Object thread) {
+		return this.socket.equals(((ServerThread) thread).getSocket());
+	}
+	
 	public void receiveMessage() throws IOException {
-		String s = this.in.readLine();
-		if(s != null) {
-			System.out.println("SERVER RECEIVED: " + s);
-			this.solve(s);
+		try {
+			String s = this.in.readLine();
+			if(s != null) {
+				System.out.println("SERVER RECEIVED: " + s);
+				this.solve(s);
+			}
+		}
+		catch(Exception e) {
+			User user = new User();
+			for(Map.Entry<User, ServerThread> connections : this.connectedUsers.entrySet()) {
+				if(connections.getValue().equals(this)) {
+					user = connections.getKey();
+				}
+			}
+			
+			System.out.println("User known as " + user.getUsername() + " has ended the connection abruptly");
+			this.out.close();
+			this.in.close();
+			this.socket.close();
 		}
 	}
 	
@@ -121,12 +143,14 @@ public class ServerThread extends Thread{
 				this.out.println(this.protocol.createSuccessLogoutMessage(tempUser));
 				this.out.close();
 				this.in.close();
+				this.online = false;
 				this.socket.close();
 			}
 			else {
 				
 			}
 		} catch(IOException e) {
+			
 			e.printStackTrace();
 		}
 	}
