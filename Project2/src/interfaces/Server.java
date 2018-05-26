@@ -41,6 +41,7 @@ public class Server {
 			this.connectedUsers = new HashMap<User, ServerThread>();
 			this.gameLobbies = new HashMap<Integer, Lobby>();
 			this.loadedDictionary = new HashMap<Integer, String>();
+			this.loadDictionary();
 		} catch (SocketException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
