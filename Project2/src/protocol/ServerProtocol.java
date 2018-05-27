@@ -1,5 +1,6 @@
 package protocol;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,12 +46,12 @@ public class ServerProtocol {
 		return message;
 	}
 	
-	public String createSuccessViewLobbiesMessage(User user, HashMap<Integer, Lobby> lobbies) {
+	public String createSuccessViewLobbiesMessage(User user, ArrayList<Lobby> lobbies) {
 		String message = "VIEWLOBBIESSUCCESS" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider +
 				user.getAddress() + Utilities.protocolDivider;
 		
-		for(Map.Entry<Integer, Lobby> lobby : lobbies.entrySet()) {
-			message += lobby.getKey() + "/////" + lobby.getValue().getLobbyInfo();
+		for(int i = 0; i < lobbies.size(); i++) {
+			message += (i+1) + "/////" + lobbies.get(i).getLobbyInfo();
 		}
 		
 		System.out.println("SERVER SENT: " + message);

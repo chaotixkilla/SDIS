@@ -23,14 +23,15 @@ public class ServerThread extends Thread{
 	private SSLSocket socket;
 	private ServerProtocol protocol;
 	private HashMap<User, ServerThread> connectedUsers;
-	private HashMap<Integer, Lobby> gameLobbies;
+	//private HashMap<Integer, Lobby> gameLobbies;
+	private ArrayList<Lobby> gameLobbies;
 	private HashMap<Integer, String> dictionary;
 	
 	private PrintWriter out;
 	private BufferedReader in;
 	private boolean online;
 	
-	public ServerThread(SSLSocket socket, HashMap<User, ServerThread> connectedUsers, HashMap<Integer, Lobby> gameLobbies, HashMap<Integer, String> dictionary) {
+	public ServerThread(SSLSocket socket, HashMap<User, ServerThread> connectedUsers, ArrayList<Lobby> gameLobbies, HashMap<Integer, String> dictionary) {
 		try {
 			this.socket = socket;
 			this.connectedUsers = connectedUsers;
@@ -80,9 +81,9 @@ public class ServerThread extends Thread{
 				}
 			}
 			
-			this.out.close();
-			this.in.close();
-			this.socket.close();
+			//this.out.close();
+			//this.in.close();
+			//this.socket.close();
 			
 			System.out.println("User known as " + user.getUsername() + " has ended the connection abruptly");
 			
@@ -96,18 +97,18 @@ public class ServerThread extends Thread{
 	}
 	
 	public Lobby getUserLobby(User user) {
-		for(Map.Entry<Integer, Lobby> lobby : this.gameLobbies.entrySet()) {
-			if(lobby.getValue().isInLobby(user)) {
-				return lobby.getValue();
+		for(Lobby lobby : this.gameLobbies) {
+			if(lobby.isInLobby(user)) {
+				return lobby;
 			}
 		}
 		return null;
 	}
 	
 	public int getLobbyID(Lobby lobby) {
-		for(Map.Entry<Integer, Lobby> lobbies : this.gameLobbies.entrySet()) {
-			if(lobbies.getValue().equals(lobby)) {
-				return lobbies.getKey();
+		for(int i = 0; i < this.gameLobbies.size(); i++) {
+			if(this.gameLobbies.get(i).equals(lobby)) {
+				return i+1;
 			}
 		}
 		return -1;
@@ -189,7 +190,7 @@ public class ServerThread extends Thread{
 		Lobby tempLobby = new Lobby(tempUser, lobbyName, Integer.parseInt(maxPlayers));
 		
 		if(this.checkMainMenuPermissions(tempUser) && this.canCreateLobby(tempUser)) {
-			this.gameLobbies.put(this.gameLobbies.size() + 1, tempLobby);
+			this.gameLobbies.add(tempLobby);
 			tempLobby.addUser(tempUser);
 			this.out.println(this.protocol.createSuccessGameCreationMessage(tempUser, tempLobby));
 		}
@@ -211,11 +212,18 @@ public class ServerThread extends Thread{
 	
 	public void enterLobby(String username, String address, String lobbyID) {
 		User tempUser = new User(username, address, true);
-		Lobby lobby = this.gameLobbies.get(Integer.parseInt(lobbyID));
+		
+		System.out.println("RECEIVED LOBBY ID: " + lobbyID);
+		
+		//printing lobbies
+		System.out.println(this.gameLobbies);
+		
+		Lobby lobby = this.gameLobbies.get(Integer.parseInt(lobbyID) - 1);
 		int repeated = 0;
 		
 		if(this.canEnterLobby(tempUser, lobby)) {
-			for(User user : this.gameLobbies.get(Integer.parseInt(lobbyID)).getUsers()) {
+			System.out.println("PODES ENTRAR");
+			for(User user : this.gameLobbies.get(Integer.parseInt(lobbyID) - 1).getUsers()) {
 				if(user.getUsername().equals(tempUser.getUsername())) {
 					repeated++;
 					tempUser.setUsername(username + "(" + repeated + ")");
@@ -223,7 +231,7 @@ public class ServerThread extends Thread{
 			}
 			lobby.addUser(tempUser);
 			this.out.println(this.protocol.createSuccessEnterGameMessage(tempUser, lobby));
-			for(User user : this.gameLobbies.get(Integer.parseInt(lobbyID)).getUsers()) {
+			for(User user : this.gameLobbies.get(Integer.parseInt(lobbyID) - 1).getUsers()) {
 				if(!user.equals(tempUser)) {
 					String msg = this.protocol.createSuccessEnterGameMessage(tempUser, lobby);
 					try {
@@ -233,12 +241,12 @@ public class ServerThread extends Thread{
 					};
 				}
 			}
+			
+			this.checkGameStart(lobby);
 		}
 		else {
 			this.out.println(this.protocol.createFailedEnterGameMessage(tempUser, lobby));
 		}
-		
-		this.checkGameStart(lobby);
 	}
 	
 	public void readyUser(String username, String address, String lobby) {
@@ -291,19 +299,19 @@ public class ServerThread extends Thread{
 		String[] lobbyInfo = lobby.split("/////");
 		Lobby tempLobby = new Lobby(new User(lobbyInfo[1], lobbyInfo[2]), lobbyInfo[0], Integer.parseInt(lobbyInfo[4]));
 		
-		for(Map.Entry<Integer, Lobby> lobbies : this.gameLobbies.entrySet()) {
+		for(Lobby lobbies : this.gameLobbies) {
 			System.out.println(tempLobby.getLobbyInfo());
-			System.out.println(lobbies.getValue().getLobbyInfo());
-			if(lobbies.getValue().equals(tempLobby)) {
-				for(User u : lobbies.getValue().getUsers()) {
-					if(u.equals(tempUser) && this.canMakePlay(u, lobbies.getValue())) {
+			System.out.println(lobbies.getLobbyInfo());
+			if(lobbies.equals(tempLobby)) {
+				for(User u : lobbies.getUsers()) {
+					if(u.equals(tempUser) && this.canMakePlay(u, lobbies)) {
 						u.makePlay(play);
 					}
 				}
 				
-				if(lobbies.getValue().hasEveryonePlayed()) {
-					for(User u : lobbies.getValue().getUsers()) {
-						String msg = this.protocol.createSuccessPlaysMessage(u, lobbies.getValue());
+				if(lobbies.hasEveryonePlayed()) {
+					for(User u : lobbies.getUsers()) {
+						String msg = this.protocol.createSuccessPlaysMessage(u, lobbies);
 						try {
 							new PrintWriter(this.connectedUsers.get(u).getSocket().getOutputStream(), true).println(msg);
 						} catch (IOException e) {
@@ -322,12 +330,12 @@ public class ServerThread extends Thread{
 		String[] lobbyInfo = lobby.split("/////");
 		Lobby tempLobby = new Lobby(new User(lobbyInfo[1], lobbyInfo[2]), lobbyInfo[0], Integer.parseInt(lobbyInfo[4]));
 		
-		for(Map.Entry<Integer, Lobby> lobbies : this.gameLobbies.entrySet()) {
-			if(lobbies.getValue().equals(tempLobby)) {
-				for(User u : lobbies.getValue().getUsers()) {
-					if(this.canVote(judge, lobbies.getValue()) && u.equals(winner)) {
+		for(Lobby lobbies : this.gameLobbies) {
+			if(lobbies.equals(tempLobby)) {
+				for(User u : lobbies.getUsers()) {
+					if(this.canVote(judge, lobbies) && u.equals(winner)) {
 						u.gainPoint();
-						this.newTurn(lobbies.getValue());
+						this.newTurn(lobbies);
 					}
 				}
 			}
@@ -359,10 +367,7 @@ public class ServerThread extends Thread{
 			}
 			
 			//delete the game
-			int ID = this.getLobbyID(lobby);
-			if(this.gameLobbies.containsKey(ID)) {
-				this.gameLobbies.remove(ID);
-			}
+			this.gameLobbies.remove(lobby);
 		}
 	}
 	
@@ -397,8 +402,8 @@ public class ServerThread extends Thread{
 	public boolean checkMainMenuPermissions(User user) {
 		boolean flag = true;
 		
-		for(Map.Entry<Integer, Lobby> lobby : this.gameLobbies.entrySet()) {
-			if(lobby.getValue().isInLobby(user)) {
+		for(Lobby lobby : this.gameLobbies) {
+			if(lobby.isInLobby(user)) {
 				flag = false;
 			}
 		}
@@ -408,8 +413,8 @@ public class ServerThread extends Thread{
 	public boolean checkLogoutPermissions(User user) {
 		boolean flag = true;
 		
-		for(Map.Entry<Integer, Lobby> lobby : this.gameLobbies.entrySet()) {
-			if(lobby.getValue().isInLobby(user)) {
+		for(Lobby lobby : this.gameLobbies) {
+			if(lobby.isInLobby(user)) {
 				flag = false;
 			}
 		}
@@ -420,8 +425,8 @@ public class ServerThread extends Thread{
 	public boolean canCreateLobby(User user) {
 		boolean flag = true;
 		
-		for(Map.Entry<Integer, Lobby> lobby : this.gameLobbies.entrySet()) {
-			if(lobby.getValue().isInLobby(user)) {
+		for(Lobby lobby : this.gameLobbies) {
+			if(lobby.isInLobby(user)) {
 				flag = false;
 			}
 		}
@@ -431,8 +436,8 @@ public class ServerThread extends Thread{
 	public boolean canEnterLobby(User user, Lobby l) {
 		boolean flag = true;
 		
-		for(Map.Entry<Integer, Lobby> lobby : this.gameLobbies.entrySet()) {
-			if(lobby.getValue().isInLobby(user)) {
+		for(Lobby lobby : this.gameLobbies) {
+			if(lobby.isInLobby(user)) {
 				flag = false;
 			}
 		}
@@ -447,8 +452,8 @@ public class ServerThread extends Thread{
 	public boolean canReadyUp(User user, Lobby lobby) {
 		boolean flag = false;
 		
-		for(Map.Entry<Integer, Lobby> l : this.gameLobbies.entrySet()) {
-			if(l.getValue().isInLobby(user)) {
+		for(Lobby l : this.gameLobbies) {
+			if(l.isInLobby(user)) {
 				flag = true;
 			}
 		}
