@@ -63,6 +63,10 @@ public class User {
 		return this.play;
 	}
 	
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	
 	public boolean isReady() {
 		return this.isReady;
 	}

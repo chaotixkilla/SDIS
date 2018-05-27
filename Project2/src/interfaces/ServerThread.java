@@ -104,6 +104,15 @@ public class ServerThread extends Thread{
 		return null;
 	}
 	
+	public int getLobbyID(Lobby lobby) {
+		for(Map.Entry<Integer, Lobby> lobbies : this.gameLobbies.entrySet()) {
+			if(lobbies.getValue().equals(lobby)) {
+				return lobbies.getKey();
+			}
+		}
+		return -1;
+	}
+	
 	//remote command solver
 	public void solve(String s) {
 		String[] tokens = s.split(Utilities.protocolDivider);
@@ -130,6 +139,9 @@ public class ServerThread extends Thread{
 				break;
 			case "PLAY":
 				this.makePlay(tokens[1], tokens[2], tokens[3], tokens[4]);
+				break;
+			case "VOTE":
+				this.makeVote(tokens[1], tokens[2], tokens[3], tokens[4], tokens[5]);
 				break;
 			default:
 				break;
@@ -200,8 +212,15 @@ public class ServerThread extends Thread{
 	public void enterLobby(String username, String address, String lobbyID) {
 		User tempUser = new User(username, address, true);
 		Lobby lobby = this.gameLobbies.get(Integer.parseInt(lobbyID));
+		int repeated = 0;
 		
 		if(this.canEnterLobby(tempUser, lobby)) {
+			for(User user : this.gameLobbies.get(Integer.parseInt(lobbyID)).getUsers()) {
+				if(user.getUsername().equals(tempUser.getUsername())) {
+					repeated++;
+					tempUser.setUsername(username + "(" + repeated + ")");
+				}
+			}
 			lobby.addUser(tempUser);
 			this.out.println(this.protocol.createSuccessEnterGameMessage(tempUser, lobby));
 			for(User user : this.gameLobbies.get(Integer.parseInt(lobbyID)).getUsers()) {
@@ -251,8 +270,8 @@ public class ServerThread extends Thread{
 	
 	public void checkGameStart(Lobby lobby) {
 		if(lobby.getUsers().size() == lobby.getMaxPlayers() && lobby.isEveryoneReady()) {
-			//starts game
 			
+			//starts game
 			lobby.startGame();
 			lobby.giveRoundWords(this.rngArray(2));
 			
@@ -272,25 +291,6 @@ public class ServerThread extends Thread{
 		String[] lobbyInfo = lobby.split("/////");
 		Lobby tempLobby = new Lobby(new User(lobbyInfo[1], lobbyInfo[2]), lobbyInfo[0], Integer.parseInt(lobbyInfo[4]));
 		
-		/*if(this.canMakePlay(tempUser, tempLobby)) {
-			for(Map.Entry<Integer, Lobby> lobbies : this.gameLobbies.entrySet()) {
-				if(lobbies.getValue().equals(tempLobby) && lobbies.getValue().isInLobby(tempUser)) {
-					System.out.println("ENTREI");
-					for(User u : lobbies.getValue().getUsers()) {
-						if(u.equals(tempUser)) {
-							System.out.println("FIZ JOGADA");
-							u.makePlay(play);
-						}
-					}
-					if(lobbies.getValue().hasEveryonePlayed()) {
-						this.out.println("TESTE");
-					}
-				}
-			}
-		}
-		else {
-			
-		}*/
 		for(Map.Entry<Integer, Lobby> lobbies : this.gameLobbies.entrySet()) {
 			System.out.println(tempLobby.getLobbyInfo());
 			System.out.println(lobbies.getValue().getLobbyInfo());
@@ -312,8 +312,58 @@ public class ServerThread extends Thread{
 					}
 				}
 			}
-		}
+		}		
+	}
+	
+	public void makeVote(String judgeUsername, String judgeAddress, String winnerUsername, String winnerAddress, String lobby) {
+		User judge = new User(judgeUsername, judgeAddress);
+		User winner = new User(winnerUsername, winnerAddress);
 		
+		String[] lobbyInfo = lobby.split("/////");
+		Lobby tempLobby = new Lobby(new User(lobbyInfo[1], lobbyInfo[2]), lobbyInfo[0], Integer.parseInt(lobbyInfo[4]));
+		
+		for(Map.Entry<Integer, Lobby> lobbies : this.gameLobbies.entrySet()) {
+			if(lobbies.getValue().equals(tempLobby)) {
+				for(User u : lobbies.getValue().getUsers()) {
+					if(this.canVote(judge, lobbies.getValue()) && u.equals(winner)) {
+						u.gainPoint();
+						this.newTurn(lobbies.getValue());
+					}
+				}
+			}
+		}
+	}
+	
+	public void newTurn(Lobby lobby) {
+		lobby.newRound();
+		lobby.giveRoundWords(this.rngArray(2));
+		
+		if(lobby.getRoundsLeft() > 0) {
+			for(User u : lobby.getUsers()) {
+				String msg = this.protocol.createSuccessNewRoundMessage(u, lobby);
+				try {
+					new PrintWriter(this.connectedUsers.get(u).getSocket().getOutputStream(), true).println(msg);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		else {
+			for(User u : lobby.getUsers()) {
+				String msg = this.protocol.createSuccessFinishGameMessage(u, lobby);
+				try {
+					new PrintWriter(this.connectedUsers.get(u).getSocket().getOutputStream(), true).println(msg);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			//delete the game
+			int ID = this.getLobbyID(lobby);
+			if(this.gameLobbies.containsKey(ID)) {
+				this.gameLobbies.remove(ID);
+			}
+		}
 	}
 	
 	public ArrayList<String> rngArray(int amount) {
@@ -410,6 +460,16 @@ public class ServerThread extends Thread{
 		boolean flag = false;
 		
 		if(lobby.isInLobby(user) && !user.equals(lobby.getCurrentJudge())) {
+			flag = true;
+		}
+		
+		return this.connectedUsers.containsKey(user) && flag;
+	}
+	
+	public boolean canVote(User user, Lobby lobby) {
+		boolean flag = false;
+		
+		if(lobby.isInLobby(user) && user.equals(lobby.getCurrentJudge())) {
 			flag = true;
 		}
 		

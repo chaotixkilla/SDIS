@@ -104,5 +104,19 @@ public class ServerProtocol {
 				user.getAddress() + Utilities.protocolDivider + lobby.getPlaysInfo();
 		return message;
 	}
+
+	public String createSuccessNewRoundMessage(User user, Lobby lobby) {
+		String message = "NEWROUNDSUCCESS" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + 
+				user.getAddress() + Utilities.protocolDivider + lobby.getGameFullInfo();
+		System.out.println("SERVER SENT: " + message);
+		return message;
+	}
+
+	public String createSuccessFinishGameMessage(User user, Lobby lobby) {
+		String message = "ENDGAMESUCCESS" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + 
+				user.getAddress() + Utilities.protocolDivider + lobby.getGameFullInfo();
+		System.out.println("SERVER SENT: " + message);
+		return message;
+	}
 	
 }

@@ -68,8 +68,21 @@ public class Lobby {
 		return this.currentJudge;
 	}
 	
+	public int getRoundsLeft() {
+		return this.roundsLeft;
+	}
+	
 	public ArrayList<String> getRoundWords() {
 		return this.roundWords;
+	}
+	
+	public User getUser(String name) {
+		for(User u : this.users) {
+			if(u.getUsername().equals(name)) {
+				return u;
+			}
+		}
+		return null;
 	}
 	
 	public boolean isInLobby(User user) {
@@ -112,6 +125,34 @@ public class Lobby {
 		}
 		this.currentJudge = this.users.get(judgeIndex);
 		this.roundWords = new ArrayList<String>();
+	}
+	
+	public void newRound() {
+		for(User u : this.users) {
+			u.newRoundVariables();
+		}
+		this.roundsLeft--;
+		this.judgeIndex++;
+		if(this.judgeIndex >= this.users.size()) {
+			this.currentJudge = this.users.get(judgeIndex % this.users.size());
+		}
+		else {
+			this.currentJudge = this.users.get(judgeIndex);
+		}
+		this.roundWords = new ArrayList<String>();
+	}
+	
+	public User getWinner() {
+		int highestScore = 0;
+		User winner = null;
+		
+		for(User u : this.users) {
+			if(u.getGameScore() > highestScore) {
+				winner = u;
+			}
+		}
+		
+		return winner;
 	}
 	
 	public void giveRoundWords(ArrayList<String> roundWords) {

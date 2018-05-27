@@ -162,6 +162,33 @@ public class ClientUI {
 		}
 		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
 	}
+	
+	public static void showVictoryScreen(User user, Lobby lobby) {
+		Utilities.clearConsole();
+		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
+		System.out.println(String.format("||                  %12s                 ||", lobby.getName()));
+		System.out.println("||-----------------------------------------------||");
+		System.out.println("||                     WINNER                    ||");
+		System.out.println("||-----------------------------------------------||");
+		System.out.println(String.format("||                 %14s                ||", lobby.getWinner().getUsername()));
+		System.out.println("||-----------------------------------------------||");
+		System.out.println("||          PLAYER NAME          |     SCORE     ||");
+		System.out.println("||-----------------------------------------------||");
+		
+		for(User u : lobby.getUsers()) {
+			System.out.println(String.format("||         %13s         |      %3s      ||", u.getUsername(), u.getGameScore()));
+		}
+		
+		System.out.println("||-----------------------------------------------||");
+		if(user.equals(lobby.getWinner())) {
+			System.out.println("||    CONGRATULATIONS! YOU HAVE WON THE GAME!    ||");
+		}
+		else {
+			System.out.println("||       TOUGH LUCK, YOU WEREN'T THE WINNER      ||");
+		}
+		System.out.println("||     PRESS '0' TO GO BACK TO THE MAIN MENU     ||");
+		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
+	}
 
 	public static void showRulesScreen() {
 		Utilities.clearConsole();
@@ -173,7 +200,7 @@ public class ClientUI {
 		System.out.println("||      At the beginning of each round, two      ||");
 		System.out.println("||    words will be randomly generated and all   ||");
 		System.out.println("||  players (except one for round which will be  ||");
-		System.out.println("||      the round\'s judge) have to input a      ||");
+		System.out.println("||       the round's judge) have to input a      ||");
 		System.out.println("||   sentence containing both words. At the end  ||");
 		System.out.println("||    of the round, the judge will vote on the   ||");
 		System.out.println("||     best, awarding a point to the author.     ||");
@@ -184,5 +211,5 @@ public class ClientUI {
 		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
 		System.out.println("||     PRESS '0' TO GO BACK TO THE MAIN MENU     ||");
 		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
-	}	
+	}
 }

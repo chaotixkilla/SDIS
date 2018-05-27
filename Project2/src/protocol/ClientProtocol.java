@@ -64,4 +64,12 @@ public class ClientProtocol {
 		System.out.println("CLIENT SENT: " + message);
 		return message;
 	}
+
+	public String createVoteMessage(User user, Lobby lobby, User winner) {
+		String message = "VOTE" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress() + 
+				Utilities.protocolDivider + winner.getUsername() + Utilities.protocolDivider + winner.getAddress() + 
+				Utilities.protocolDivider + lobby.getLobbyInfo();
+		System.out.println("CLIENT SENT: " + message);
+		return message;
+	}
 }

@@ -98,6 +98,7 @@ public class Client {
 				this.viewLobby(tokens[3]);
 				break;
 			case "CREATEGAMEFAILURE":
+				this.mainMenu();
 				break;
 			case "VIEWLOBBIESSUCCESS":
 				this.viewLobbies(tokens[3]);
@@ -121,6 +122,12 @@ public class Client {
 				break;
 			case "PLAYSSUCCESS":
 				this.viewVotingScreen(tokens[3]);
+				break;
+			case "NEWROUNDSUCCESS":
+				this.viewGame(tokens[3]);
+				break;
+			case "ENDGAMESUCCESS":
+				this.viewGameVictoryScreen(tokens[3]);
 				break;
 			default:
 				break;
@@ -320,6 +327,43 @@ public class Client {
 		this.updateCurrentGamePlays(message);
 		System.out.println(this.currentLobby.getPlaysInfo());
 		ClientUI.showVotingScreen(this.currentUser, this.currentLobby);
+		
+		if(this.currentUser.equals(this.currentLobby.getCurrentJudge())) {
+			boolean flag = false;
+			String input = new String();
+			while(!flag) {
+				input = this.getUserInput();
+				flag = this.validPlayerName(input);
+				if(!flag) {
+					System.out.println("Invalid player name!");
+				}
+			}
+			this.out.println(this.protocol.createVoteMessage(this.currentUser, this.currentLobby, this.currentLobby.getUser(input)));
+			System.out.println("You voted on " + input + "!");
+			this.receiveMessage();
+		}
+		else {
+			this.receiveMessage();
+		}
+	}
+	
+	public void viewGameVictoryScreen(String message) {
+		this.updateCurrentGameRound(message);
+		
+		ClientUI.showVictoryScreen(this.currentUser, this.currentLobby);
+		
+		int input = this.getUserOption(0, 0);
+		
+		if(input == 0) {
+			try {
+				this.mainMenu();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		else {
+			
+		}
 	}
 	
 	public String getUserInput() {
@@ -379,7 +423,6 @@ public class Client {
 	}
 	
 	public boolean validVerse(String verse, ArrayList<String> words) {
-		
 		String[] tokens = verse.split(" ");
 		ArrayList<String> tokensList = new ArrayList<String>(Arrays.asList(tokens));
 		
@@ -388,6 +431,21 @@ public class Client {
 				return false;
 		}
 		return true;
+	}
+	
+	public boolean validPlayerName(String name) {
+		/*for(int i=0; i < this.players.size(); i++) {
+			if( name.equals(this.players.get(i).getName()) && 
+				!name.equals(this.players.get(this.currentJudge).getName()))
+				return true;
+		}
+		return false;*/
+		for(User u : this.currentLobby.getUsers()) {
+			if(u.getUsername().equals(name) && !u.equals(this.currentLobby.getCurrentJudge())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void closeClient() {
