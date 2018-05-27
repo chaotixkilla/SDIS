@@ -8,6 +8,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.rmi.ConnectException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -118,6 +119,9 @@ public class Client {
 			case "STARTGAMESUCCESS":
 				this.viewGame(tokens[3]);
 				break;
+			case "PLAYSSUCCESS":
+				this.viewVotingScreen(tokens[3]);
+				break;
 			default:
 				break;
 		}
@@ -202,7 +206,7 @@ public class Client {
 		this.currentLobby = new Lobby(new User(hostName, hostAddress), lobbyName, users, currPlayers, maxPlayers);
 	}
 	
-	public void updateCurrentGame(String message) {
+	public void updateCurrentGameRound(String message) {
 		String[] lobbyInfo = message.split("/////"); //[0]: lobbyName, [1]: lobbyHost, [2]: lobbyHostAddress, [3]: currentPlayers, [4]: maxPlayers, [5]: allPlayerInfo
 		
 		String lobbyName = lobbyInfo[0];
@@ -225,6 +229,30 @@ public class Client {
 		
 		this.currentLobby = new Lobby(new User(hostName, hostAddress), lobbyName, users, currPlayers, maxPlayers, hasStarted, currentJudge, words);
 		
+	}
+	
+	public void updateCurrentGamePlays(String message) {
+		String[] lobbyInfo = message.split("/////"); //[0]: lobbyName, [1]: lobbyHost, [2]: lobbyHostAddress, [3]: currentPlayers, [4]: maxPlayers, [5]: allPlayerInfo
+		
+		String lobbyName = lobbyInfo[0];
+		String hostName = lobbyInfo[1];
+		String hostAddress = lobbyInfo[2];
+		int currPlayers = Integer.parseInt(lobbyInfo[3]);
+		int maxPlayers = Integer.parseInt(lobbyInfo[4]);
+		boolean hasStarted = Boolean.parseBoolean(lobbyInfo[5]);
+		User currentJudge = new User(lobbyInfo[6], lobbyInfo[7]);
+		ArrayList<User> users = new ArrayList<User>();
+		ArrayList<String> words = new ArrayList<String>();
+		words.add(lobbyInfo[8]);
+		words.add(lobbyInfo[9]);
+		
+		String[] players = lobbyInfo[10].split("#####"); //[0]: playerName, [1]: playerAddress, [2]: isReady, [3]: 2nd playerName, ...
+		
+		for(int i = 0; i < players.length; i += 5) {
+			users.add(new User(players[i], players[i+1], Boolean.parseBoolean(players[i+2]), Integer.parseInt(players[i+3]), players[i+4]));
+		}
+		
+		this.currentLobby = new Lobby(new User(hostName, hostAddress), lobbyName, users, currPlayers, maxPlayers, hasStarted, currentJudge, words);
 	}
 	
 	public void viewLobby(String message) {
@@ -265,9 +293,33 @@ public class Client {
 		}
 	}
 	
-	private void viewGame(String message) {
-		this.updateCurrentGame(message);
-		ClientUI.showGameScreen(this.currentLobby);
+	public void viewGame(String message) {
+		this.updateCurrentGameRound(message);
+		ClientUI.showGameScreen(this.currentUser, this.currentLobby);
+		
+		if(!this.currentUser.equals(this.currentLobby.getCurrentJudge())) {
+			boolean flag = false;
+			String input = new String();
+			while(!flag) {
+				input = this.getUserGameInput();
+				flag = this.validVerse(input, this.currentLobby.getRoundWords());
+				if(!flag) {
+					System.out.println("Invalid sentence! Please make sure both mandatory words are present.");
+				}
+			}
+			this.out.println(this.protocol.createPlayMessage(this.currentUser, this.currentLobby, input));
+			System.out.println("Waiting for other players input...");
+			this.receiveMessage();
+		}
+		else {
+			this.receiveMessage();
+		}
+	}
+	
+	public void viewVotingScreen(String message) {
+		this.updateCurrentGamePlays(message);
+		System.out.println(this.currentLobby.getPlaysInfo());
+		ClientUI.showVotingScreen(this.currentUser, this.currentLobby);
 	}
 	
 	public String getUserInput() {
@@ -279,6 +331,25 @@ public class Client {
 			
 			//sanitize input
 			Pattern p = Pattern.compile("^([a-zA-Z0-9_-])*$");
+			Matcher m = p.matcher(input);
+			flag = m.matches();
+			
+			if(!flag) {
+				System.out.println("Invalid input, try again!");
+			}
+		}
+		return input;
+	}
+	
+	public String getUserGameInput() {
+		boolean flag = false;
+		String input = new String();
+		
+		while(!flag) {
+			input = this.scanner.nextLine();
+			
+			//sanitize input
+			Pattern p = Pattern.compile("^([^#$%&/=:*+'_\\\\|«»^~´`{}\\[\\]@£§€<>])*$");
 			Matcher m = p.matcher(input);
 			flag = m.matches();
 			
@@ -307,24 +378,16 @@ public class Client {
 		return option;
 	}
 	
-	public int getUserOption(int min, int max, int amount) {
-		int option = -1;
-		long start = System.currentTimeMillis();
+	public boolean validVerse(String verse, ArrayList<String> words) {
 		
-		while((System.currentTimeMillis() - start) < amount) {
-			System.out.println((System.currentTimeMillis() - start));
-			if(this.scanner.hasNextInt()) {
-				option = this.scanner.nextInt();
-				this.scanner.nextLine(); //clear buffer
-				if(option >= min && option <= max) {
-					break;
-				}
-			}
-			else {
-				this.scanner.next();
-			}
+		String[] tokens = verse.split(" ");
+		ArrayList<String> tokensList = new ArrayList<String>(Arrays.asList(tokens));
+		
+		for(int i=0; i < words.size(); i++) {
+			if(!tokensList.contains(words.get(i)))
+				return false;
 		}
-		return option;
+		return true;
 	}
 
 	public void closeClient() {

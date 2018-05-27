@@ -98,5 +98,11 @@ public class ServerProtocol {
 		System.out.println("SERVER SENT: " + message);
 		return message;
 	}
+
+	public String createSuccessPlaysMessage(User user, Lobby lobby) {
+		String message = "PLAYSSUCCESS" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider +
+				user.getAddress() + Utilities.protocolDivider + lobby.getPlaysInfo();
+		return message;
+	}
 	
 }

@@ -13,8 +13,9 @@ public class Lobby {
 	//game
 	private boolean hasStarted;
 	private User currentJudge;
-	private int judgeIndex = 0;
+	private int judgeIndex;
 	private ArrayList<String> roundWords;
+	private int roundsLeft;
 	
 	public Lobby(User host, String name, int maxPlayers) {
 		this.host = host;
@@ -92,17 +93,25 @@ public class Lobby {
 		return flag;
 	}
 	
+	public boolean hasEveryonePlayed() {
+		boolean flag = true;
+		for(User u : users) {
+			if(!u.equals(this.currentJudge) && !u.hasPlayed()) {
+				flag = false;
+			}
+		}
+		return flag;
+	}
+	
 	public void startGame() {
 		this.hasStarted = true;
+		this.judgeIndex = 0;
+		this.roundsLeft = 5;
 		for(User u : this.users) {
 			u.startGameVariables();
 		}
 		this.currentJudge = this.users.get(judgeIndex);
 		this.roundWords = new ArrayList<String>();
-		
-		//testing purposes
-		this.roundWords.add("teste");
-		this.roundWords.add("palavra");
 	}
 	
 	public void giveRoundWords(ArrayList<String> roundWords) {
@@ -129,6 +138,17 @@ public class Lobby {
 				"/////" + this.roundWords.get(0) + "/////" + this.roundWords.get(1) + "/////";
 		for(User user : this.users) {
 			info += user.getUserFullInfo();
+		}
+		return info;
+	}
+	
+	public String getPlaysInfo() {
+		String info = this.name + "/////" + this.host.getUsername() + "/////" + this.host.getAddress() + 
+				"/////" + this.currentPlayers + "/////" + this.maxPlayers + "/////" + this.hasStarted + 
+				"/////" + this.currentJudge.getUsername() + "/////" + this.currentJudge.getAddress() + 
+				"/////" + this.roundWords.get(0) + "/////" + this.roundWords.get(1) + "/////";
+		for(User user : this.users) {
+			info += user.getUserPlayInfo();
 		}
 		return info;
 	}

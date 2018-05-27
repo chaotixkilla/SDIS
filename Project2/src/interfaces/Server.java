@@ -52,7 +52,7 @@ public class Server {
 	protected void run() throws IOException {
 		while(true) {
 			SSLSocket receivingSocket = (SSLSocket) this.socket.accept();	
-			new ServerThread(receivingSocket, this.connectedUsers, this.gameLobbies).start();
+			new ServerThread(receivingSocket, this.connectedUsers, this.gameLobbies, this.loadedDictionary).start();
 		}
 	}
 	

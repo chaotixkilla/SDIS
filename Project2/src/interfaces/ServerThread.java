@@ -5,8 +5,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 import javax.net.ssl.SSLSocket;
 
@@ -20,12 +24,13 @@ public class ServerThread extends Thread{
 	private ServerProtocol protocol;
 	private HashMap<User, ServerThread> connectedUsers;
 	private HashMap<Integer, Lobby> gameLobbies;
+	private HashMap<Integer, String> dictionary;
 	
 	private PrintWriter out;
 	private BufferedReader in;
 	private boolean online;
 	
-	public ServerThread(SSLSocket socket, HashMap<User, ServerThread> connectedUsers, HashMap<Integer, Lobby> gameLobbies) {
+	public ServerThread(SSLSocket socket, HashMap<User, ServerThread> connectedUsers, HashMap<Integer, Lobby> gameLobbies, HashMap<Integer, String> dictionary) {
 		try {
 			this.socket = socket;
 			this.connectedUsers = connectedUsers;
@@ -33,6 +38,7 @@ public class ServerThread extends Thread{
 			this.protocol = new ServerProtocol();
 			this.out = new PrintWriter(this.socket.getOutputStream(), true);
 			this.in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));	
+			this.dictionary = dictionary;
 			this.online = true;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -74,10 +80,18 @@ public class ServerThread extends Thread{
 				}
 			}
 			
-			System.out.println("User known as " + user.getUsername() + " has ended the connection abruptly");
 			this.out.close();
 			this.in.close();
 			this.socket.close();
+			
+			System.out.println("User known as " + user.getUsername() + " has ended the connection abruptly");
+			
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 	}
 	
@@ -113,6 +127,9 @@ public class ServerThread extends Thread{
 				break;
 			case "READYLOBBY":
 				this.readyUser(tokens[1], tokens[2], tokens[3]);
+				break;
+			case "PLAY":
+				this.makePlay(tokens[1], tokens[2], tokens[3], tokens[4]);
 				break;
 			default:
 				break;
@@ -237,6 +254,7 @@ public class ServerThread extends Thread{
 			//starts game
 			
 			lobby.startGame();
+			lobby.giveRoundWords(this.rngArray(2));
 			
 			for(User u : lobby.getUsers()) {
 				String msg = this.protocol.createSuccessStartGameMessage(u, lobby);
@@ -247,6 +265,73 @@ public class ServerThread extends Thread{
 				}
 			}
 		}
+	}
+	
+	public void makePlay(String username, String address, String play, String lobby) {
+		User tempUser = new User(username, address);
+		String[] lobbyInfo = lobby.split("/////");
+		Lobby tempLobby = new Lobby(new User(lobbyInfo[1], lobbyInfo[2]), lobbyInfo[0], Integer.parseInt(lobbyInfo[4]));
+		
+		/*if(this.canMakePlay(tempUser, tempLobby)) {
+			for(Map.Entry<Integer, Lobby> lobbies : this.gameLobbies.entrySet()) {
+				if(lobbies.getValue().equals(tempLobby) && lobbies.getValue().isInLobby(tempUser)) {
+					System.out.println("ENTREI");
+					for(User u : lobbies.getValue().getUsers()) {
+						if(u.equals(tempUser)) {
+							System.out.println("FIZ JOGADA");
+							u.makePlay(play);
+						}
+					}
+					if(lobbies.getValue().hasEveryonePlayed()) {
+						this.out.println("TESTE");
+					}
+				}
+			}
+		}
+		else {
+			
+		}*/
+		for(Map.Entry<Integer, Lobby> lobbies : this.gameLobbies.entrySet()) {
+			System.out.println(tempLobby.getLobbyInfo());
+			System.out.println(lobbies.getValue().getLobbyInfo());
+			if(lobbies.getValue().equals(tempLobby)) {
+				for(User u : lobbies.getValue().getUsers()) {
+					if(u.equals(tempUser) && this.canMakePlay(u, lobbies.getValue())) {
+						u.makePlay(play);
+					}
+				}
+			}
+			
+			if(lobbies.getValue().hasEveryonePlayed()) {
+				for(User u : lobbies.getValue().getUsers()) {
+					String msg = this.protocol.createSuccessPlaysMessage(u, lobbies.getValue());
+					try {
+						new PrintWriter(this.connectedUsers.get(u).getSocket().getOutputStream(), true).println(msg);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		
+	}
+	
+	public ArrayList<String> rngArray(int amount) {
+		Random rng = new Random();
+		Set<Integer> generated = new LinkedHashSet<Integer>();
+		ArrayList<String> generatedWords = new ArrayList<String>();
+		
+		while (generated.size() < amount)
+		{
+		    Integer next = rng.nextInt(this.dictionary.size()) + 1;
+		    generated.add(next);
+		}
+		
+		for(Integer i : generated) {
+			generatedWords.add(this.dictionary.get(i));
+		}
+		
+		return generatedWords;
 	}
 	
 	/*
@@ -321,4 +406,13 @@ public class ServerThread extends Thread{
 		return this.connectedUsers.containsKey(user) && flag;
 	}
 	
+	public boolean canMakePlay(User user, Lobby lobby) {
+		boolean flag = false;
+		
+		if(lobby.isInLobby(user) && !user.equals(lobby.getCurrentJudge())) {
+			flag = true;
+		}
+		
+		return this.connectedUsers.containsKey(user) && flag;
+	}
 }

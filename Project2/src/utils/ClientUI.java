@@ -105,7 +105,7 @@ public class ClientUI {
 	}
 	
 	
-	public static void showGameScreen(Lobby lobby) {
+	public static void showGameScreen(User user, Lobby lobby) {
 		Utilities.clearConsole();
 		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
 		System.out.println(String.format("||                  %12s                 ||", lobby.getName()));
@@ -119,15 +119,48 @@ public class ClientUI {
 		System.out.println("||          PLAYER NAME          |     SCORE     ||");
 		System.out.println("||-----------------------------------------------||");
 		
-		for(User user : lobby.getUsers()) {
-			System.out.println(String.format("||         %13s         |      %3s      ||", user.getUsername(), user.getGameScore()));
+		for(User u : lobby.getUsers()) {
+			System.out.println(String.format("||         %13s         |      %3s      ||", u.getUsername(), u.getGameScore()));
 		}
 		
 		System.out.println("||-----------------------------------------------||");
-		System.out.println("||                                               ||");
+		if(user.equals(lobby.getCurrentJudge())) {
+			System.out.println("||YOU ARE THIS ROUND'S JUDGE! WAIT FOR THE OTHER ||");
+			System.out.println("||  PLAYERS AND VOTE ON YOUR FAVORITE SENTENCE!  ||");
+		}
+		else {
+			System.out.println("||    TYPE A SENTENCE THAT USES BOTH WORDS ON    ||");
+			System.out.println("||                   THE SCREEN!                 ||");
+		}
 		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
+	}
+	
+	public static void showVotingScreen(User user, Lobby lobby) {
+		Utilities.clearConsole();
+		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
+		System.out.println(String.format("||                  %12s                 ||", lobby.getName()));
+		System.out.println("||-----------------------------------------------||");
+		System.out.println(String.format("|| CURRENT JUDGE: %14s                 ||", lobby.getCurrentJudge().getUsername()));
+		System.out.println("||-----------------------------------------------||");
+		System.out.println("||               PLAYER'S SENTENCES              ||");
+		System.out.println("||-----------------------------------------------||");
 		
-		System.out.println(lobby.getGameFullInfo());
+		for(User u : lobby.getUsers()) {
+			if(u.hasPlayed()) {
+				System.out.println(String.format("||  %13s  | %27s ||", u.getUsername(), u.getPlay()));
+			}
+		}
+		
+		System.out.println("||-----------------------------------------------||");
+		if(user.equals(lobby.getCurrentJudge())) {
+			System.out.println("||  YOU ARE THIS ROUND'S JUDGE! TYPE A PLAYER'S  ||");
+			System.out.println("||       NAME TO DECIDE WHO WINS THIS ROUND      ||");
+		}
+		else {
+			System.out.println("||       THE ROUND'S JUDGE IS NOW VOTING...      ||");
+			System.out.println("||                   GOOD LUCK!                  ||");
+		}
+		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
 	}
 
 	public static void showRulesScreen() {
@@ -151,5 +184,5 @@ public class ClientUI {
 		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
 		System.out.println("||     PRESS '0' TO GO BACK TO THE MAIN MENU     ||");
 		System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||");
-	}
+	}	
 }

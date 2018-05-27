@@ -31,10 +31,6 @@ public class ClientProtocol {
 		return message;
 	}
 
-	public String createViewRulesMessage(User user) {
-		return null;
-	}
-
 	public String createLogoutMessage(User user) {
 		String message = "LOGOUT" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress();
 		System.out.println("CLIENT SENT: " + message);
@@ -58,6 +54,13 @@ public class ClientProtocol {
 	public String createLobbyReadyMessage(User user, Lobby lobby) {
 		String message = "READYLOBBY" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress() + 
 				Utilities.protocolDivider + lobby.getLobbyInfo();
+		System.out.println("CLIENT SENT: " + message);
+		return message;
+	}
+
+	public String createPlayMessage(User user, Lobby lobby, String input) {
+		String message = "PLAY" + Utilities.protocolDivider + user.getUsername() + Utilities.protocolDivider + user.getAddress() + 
+				Utilities.protocolDivider + input + Utilities.protocolDivider + lobby.getLobbyInfo();
 		System.out.println("CLIENT SENT: " + message);
 		return message;
 	}

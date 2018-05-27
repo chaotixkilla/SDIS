@@ -7,6 +7,8 @@ public class User {
 	//game variables
 	private boolean isReady;
 	private int gameScore;
+	private boolean hasPlayed;
+	private String play;
 	
 	public User() {
 		
@@ -30,6 +32,21 @@ public class User {
 		this.gameScore = gameScore;
 	}
 	
+	public User(String username, String address, boolean isReady, int gameScore, String play) {
+		this.username = username;
+		this.address = address;
+		this.isReady = isReady;
+		this.gameScore = gameScore;
+		
+		if(play.equals("NOPLAY")) {
+			this.hasPlayed = false;
+		}
+		else {
+			this.hasPlayed = true;
+			this.play = play;
+		}
+	}
+	
 	public String getUsername() {
 		return this.username;
 	}
@@ -42,8 +59,16 @@ public class User {
 		return this.gameScore;
 	}
 	
+	public String getPlay() {
+		return this.play;
+	}
+	
 	public boolean isReady() {
 		return this.isReady;
+	}
+	
+	public boolean hasPlayed() {
+		return this.hasPlayed;
 	}
 	
 	public void ready() {
@@ -52,6 +77,18 @@ public class User {
 	
 	public void startGameVariables() {
 		this.gameScore = 0;
+		this.play = new String();
+		this.hasPlayed = false;
+	}
+	
+	public void newRoundVariables() {
+		this.play = new String();
+		this.hasPlayed = false;
+	}
+	
+	public void makePlay(String play) {
+		this.play = play;
+		this.hasPlayed = true;
 	}
 	
 	public void gainPoint() {
@@ -65,6 +102,17 @@ public class User {
 	
 	public String getUserFullInfo() {
 		String info = this.getUsername() + "#####" + this.getAddress() + "#####" + this.isReady + "#####" + this.gameScore + "#####";
+		return info;
+	}
+	
+	public String getUserPlayInfo() {
+		String info = this.getUsername() + "#####" + this.getAddress() + "#####" + this.isReady + "#####" + this.gameScore + "#####";
+		if(this.hasPlayed) {
+			info += this.play + "#####";
+		}
+		else {
+			info += "NOPLAY" + "#####";
+		}
 		return info;
 	}
 	
