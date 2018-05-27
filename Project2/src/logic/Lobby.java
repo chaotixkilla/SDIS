@@ -1,7 +1,6 @@
 package logic;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
 public class Lobby {
 	private User host;

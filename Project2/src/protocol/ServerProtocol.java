@@ -1,8 +1,6 @@
 package protocol;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import logic.Lobby;
 import logic.User;

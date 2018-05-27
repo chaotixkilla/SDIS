@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.rmi.ConnectException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -73,7 +72,7 @@ public class Client {
 	public void receiveMessage() {
 		try {
 			String s = this.in.readLine();
-			System.out.println("CLIENT RECEIVED: " + s);
+			//System.out.println("CLIENT RECEIVED: " + s);
 			this.solve(s);
 		} catch(IOException e) {
 			e.printStackTrace();
@@ -85,7 +84,6 @@ public class Client {
 		switch(tokens[0]) {
 			case "LOGINSUCCESS":
 				this.currentUser = new User(tokens[1], tokens[2]); //TODO: not sure if this is the most appropriate way
-				System.out.println("CREATED USER: " + tokens[1] + "     " + tokens[2]);
 				this.mainMenu();
 				break;
 			case "LOGINFAILURE":
@@ -325,7 +323,6 @@ public class Client {
 	
 	public void viewVotingScreen(String message) {
 		this.updateCurrentGamePlays(message);
-		System.out.println(this.currentLobby.getPlaysInfo());
 		ClientUI.showVotingScreen(this.currentUser, this.currentLobby);
 		
 		if(this.currentUser.equals(this.currentLobby.getCurrentJudge())) {
