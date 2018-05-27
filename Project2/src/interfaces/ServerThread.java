@@ -213,16 +213,10 @@ public class ServerThread extends Thread{
 	public void enterLobby(String username, String address, String lobbyID) {
 		User tempUser = new User(username, address, true);
 		
-		System.out.println("RECEIVED LOBBY ID: " + lobbyID);
-		
-		//printing lobbies
-		System.out.println(this.gameLobbies);
-		
 		Lobby lobby = this.gameLobbies.get(Integer.parseInt(lobbyID) - 1);
 		int repeated = 0;
 		
 		if(this.canEnterLobby(tempUser, lobby)) {
-			System.out.println("PODES ENTRAR");
 			for(User user : this.gameLobbies.get(Integer.parseInt(lobbyID) - 1).getUsers()) {
 				if(user.getUsername().equals(tempUser.getUsername())) {
 					repeated++;
