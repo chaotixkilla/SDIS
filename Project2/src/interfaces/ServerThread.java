@@ -300,15 +300,15 @@ public class ServerThread extends Thread{
 						u.makePlay(play);
 					}
 				}
-			}
-			
-			if(lobbies.getValue().hasEveryonePlayed()) {
-				for(User u : lobbies.getValue().getUsers()) {
-					String msg = this.protocol.createSuccessPlaysMessage(u, lobbies.getValue());
-					try {
-						new PrintWriter(this.connectedUsers.get(u).getSocket().getOutputStream(), true).println(msg);
-					} catch (IOException e) {
-						e.printStackTrace();
+				
+				if(lobbies.getValue().hasEveryonePlayed()) {
+					for(User u : lobbies.getValue().getUsers()) {
+						String msg = this.protocol.createSuccessPlaysMessage(u, lobbies.getValue());
+						try {
+							new PrintWriter(this.connectedUsers.get(u).getSocket().getOutputStream(), true).println(msg);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
 					}
 				}
 			}
